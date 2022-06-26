@@ -17,7 +17,7 @@ from transformers import TrainingArguments     # https://huggingface.co/transfor
 from transformers import Trainer    # https://huggingface.co/transformers/v3.0.2/main_classes/trainer
 import time
 import requests
-#import kaggle
+#
 
 # Handle configurations
 import config
@@ -289,6 +289,7 @@ def send_discord_notif(title,content,color,error=None):
 
 # KAGGLE API
 def submit_tests(submit_filename,msg):
+    import kaggle
     api = kaggle.api
     api.get_config_value("username")
     res = api.competition_submit(submit_filename,f"Automatic File submission test: {msg}","cil-text-classification-2022")
