@@ -1,0 +1,12 @@
+new-venv
+old
+test-results
+tmp_trainer
+train_results
+__pycache__
+.pytest_cache
+checkpoint-3000
+sample_submission.csv
+test_results
+train_neg_full.txt
+train_pos_full.txt
