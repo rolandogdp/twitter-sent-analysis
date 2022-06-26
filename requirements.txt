@@ -1,0 +1,11 @@
+numpy
+pandas
+sklearn
+matplotlib
+torch
+scipy
+transformers
+torchvision
+datascience
+folium
+datasets
