@@ -11,10 +11,10 @@ class Constants(object):
     class __Constants:
         def __init__(self):
             # Environment setup
-            self.PROJECT_PATH = os.environ["CIL_PROJECT_PATH"] # for cluster; "./"  for local
-            self.EXPERIMENT_PATH = os.environ["CIL_EXPERIMENTS_PATH"] # for cluster; "./"  for local
+            # self.PROJECT_PATH = os.environ["CIL_PROJECT_PATH"] # for cluster; "./"  for local
+            # self.EXPERIMENT_PATH = os.environ["CIL_EXPERIMENTS_PATH"] # for cluster; "./"  for local
+            # self.checkpoints_path = self.EXPERIMENT_PATH+"train_results/"
             self.DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-            self.checkpoints_path = self.EXPERIMENT_PATH+"train_results/"
             self.discord_hook = "https://discord.com/api/webhooks/990270535592181800/g_zbw08Fz-52WZAbeb1Sy5au_ND2h1TmSmn1Cs_BIrHj7ne3Mb8rcnbl3EcrOY-hd_sn"
             self.bot_name = "Klim's bot"
             
@@ -54,6 +54,7 @@ class Configuration(object):
         # parser.add_argument('--data_workers', type=int, default=4, help='Number of parallel threads for data loading.')
         # parser.add_argument('--print_every', type=int, default=200, help='Print stats to console every so many iters.')
         # parser.add_argument('--eval_every', type=int, default=400, help='Evaluate validation set every so many iters.')
+        parser.add_argument("--on_cluster", default=False, action="store_true")
 
         # Kaggle
         parser.add_argument("--autosubmit", default=False, action="store_true")
@@ -78,7 +79,7 @@ class Configuration(object):
         parser.add_argument('--model_name', type=str, default="bert-base-cased", help='Default model name to load')
         
         # Learning args
-        parser.add_argument('--train_val_ratio', type=int, default=0.8, help='The training/validation ratio to use for the given dataset.')
+        parser.add_argument('--train_val_ratio', type=int, default=0.9, help='The training/validation ratio to use for the given dataset.')
         parser.add_argument('--lr', type=float, default=1e-4, help='Learning rate.')
         parser.add_argument('--n_epochs', type=int, default=2, help='Number of train epochs.')
         parser.add_argument('--weight_decay', type=int, default=0.01, help='Weight decay.')

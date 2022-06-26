@@ -1,1 +1,1 @@
-transformer_fine_tuning.py 
+HF_transformer.py --train --test --n_epochs 1

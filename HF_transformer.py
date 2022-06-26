@@ -20,7 +20,6 @@ from datasets import load_metric
 
 import time
 import requests
-#import kaggle
 
 # Config file
 from transformer_config import Configuration
@@ -35,13 +34,15 @@ orange = 15105570
 
 # CONSTANT VALUES
 device = C.DEVICE
-project_path = C.PROJECT_PATH
-print(project_path)
-experiment_path = C.EXPERIMENT_PATH
-print(experiment_path)
-checkpoints_path = C.checkpoints_path
-print(checkpoints_path)
-metric = load_metric("accuracy")
+
+# project_path = C.PROJECT_PATH
+# print("The project folder path is: ", project_path)
+# experiment_path = C.EXPERIMENT_PATH
+# print("The experiment folder path is: ", experiment_path)
+# checkpoints_path = C.checkpoints_path
+# print("Model checkpoints will be saved in: ", checkpoints_path)
+
+metric = load_metric("accuracy")    # metric to use
 
 # DATASET CLASSES
 class TrainDataset(Dataset):
@@ -51,7 +52,7 @@ class TrainDataset(Dataset):
 
     def __getitem__(self, idx):
         item = {key: torch.tensor(value[idx]) for key, value in self.encodings.items()}
-        item['labels'] = torch.tensor(self.labels[idx]).clone().detach()
+        item['labels'] = self.labels[idx].clone().detach()
         return item
 
     def __len__(self):
@@ -66,7 +67,7 @@ class TestDataset(Dataset):
         return item
 
     def __len__(self):
-        return len(self.encodings["input_ids"])
+        return len(self.encodings["input_ids"])     # number of items in the Dataset
 
 
 train_dataset, val_dataset = None, None
@@ -76,7 +77,7 @@ def read_file(file_name_label_tuple, starting_line=0, end_line=0):
     fname, label = file_name_label_tuple
     tweets, labels = [], []
     with open( fname, 'r', encoding='utf-8') as f:
-        tweets = [line for line in f.readlines()[starting_line:end_line] ]
+        tweets = [line for line in f.readlines()[starting_line:end_line]]
         labels = [label] * (end_line-starting_line)
     return(tweets, labels)
 
@@ -178,7 +179,7 @@ def train(model,train_dataset_param,val_dataset_param):
                                     gradient_checkpointing=True,
                                     overwrite_output_dir=True,
                                     save_total_limit=2,
-                                    # fp16=fp16,
+                                    fp16=fp16,
                                     seed=SEED,
                                     # warmup_steps=500,              # number of warmup steps for learning rate scheduler
                                     weight_decay=weight_decay,       # strength of weight decay
@@ -256,47 +257,59 @@ def load_and_train(model, amount_per_batch, iteration):
     return model
 
 # DISCORD
-# def send_discord_notif(title,content,color,error=None):
-#     if not discord_enabled:
-#         return
-#     if error is None:
-#         msg = "Little Update on my status"
-#     else: msg = error
+def send_discord_notif(title, content, color, error=None):
+    if not discord_enabled:
+        return
+    if error is None:
+        msg = "Little Update on my status"
+    else: 
+        msg = error
 
-#     data = {
-#         "username": bot_name,
-#         "content": msg,
-#     }
-#     data["embeds"] = [
+    data = {
+        "username": bot_name,
+        "content": msg,
+    }
+    data["embeds"] = [{
+        "title":title,
+        "description":content,
+        "color":color
+        }]
 
-#         {
-#         "title":title,
-#         "description":content,
-#         "color":color
-#     }
-# ]
-
-#     result = requests.post(discord_hook, json = data)
-#     try:
-#         result.raise_for_status()
-#     except requests.exceptions.HTTPError as err:
-#         print(err)
-    #else:
-    #    print("Payload delivered successfully, code {}.".format(result.status_code))
+    result = requests.post(discord_hook, json = data)
+    
+    try:
+        result.raise_for_status()
+    except requests.exceptions.HTTPError as err:
+        print(err)
+    else:
+       print("Payload delivered successfully, code {}.".format(result.status_code))
 
 # KAGGLE API
-# def submit_preds_on_Kaggle(submit_filename,msg):
-#     api = kaggle.api
-#     api.get_config_value("username")
-#     res = api.competition_submit(submit_filename, f"Automatic File submission test: {msg}", "cil-text-classification-2022")
-#     print("res:",res)
-#     return res
+def submit_preds_on_Kaggle(submit_filename, msg):
+    import kaggle
+    api = kaggle.api
+    api.get_config_value("username")
+    res = api.competition_submit(submit_filename, f"Automatic File submission test: {msg}", "cil-text-classification-2022")
+    print("res: ", res)
+    
+    return res
 
 
 if __name__ == "__main__":
 
     # Get config
     config = Configuration.parse_cmd()
+
+    print(config.on_cluster)
+    if config.on_cluster:
+        project_path = os.environ["CIL_PROJECT_PATH"] # for cluster; "./"  for local
+        experiment_path = os.environ["CIL_EXPERIMENTS_PATH"] # for cluster; "./"  for local
+        checkpoints_path = experiment_path+"train_results/"
+    else:
+        project_path = ""
+        experiment_path = "./Experiments/"
+        checkpoints_path = experiment_path+"train_results/"
+
 
     # Fix seeds for reproducibility
     SEED = config.seed
@@ -335,13 +348,12 @@ if __name__ == "__main__":
     weight_decay = config.weight_decay
     tokenizer = AutoTokenizer.from_pretrained(model_name)
 
-    
     if not (config.load_model is None):
         model = load_model_from_checkpoint(config.load_model)
 
     # Misc
-    # submit_to_kaggle = config.autosubmit
-    # discord_enabled =  config.discord
+    submit_to_kaggle = config.autosubmit
+    discord_enabled =  config.discord
         
 
     # --- TRAINING & VALIDATION ---
@@ -350,20 +362,20 @@ if __name__ == "__main__":
         number_of_iterations = int(np.ceil(total_amount_of_tweets / amount_per_it))
         print(f"Going to do {number_of_iterations} iterations to do {total_amount_of_tweets} tweets in batch sizes of {amount_per_it}")
 
-        # send_discord_notif("Starting Training", f"Going to do {number_of_iterations} iterations\
-        # to do {total_amout_of_tweets} tweets in batch sizes of {amount_per_it}", orange, None)
+        send_discord_notif("Starting Training", f"Going to do {number_of_iterations} iterations\
+        to do {total_amount_of_tweets} tweets in batch sizes of {amount_per_it}", orange, None)
 
         model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=2)
         try:
             for iteration in range(number_of_iterations)[config.start_at_it:]:
                 model = load_and_train(model,amount_per_it, iteration)
-                # send_discord_notif("Continuing Training", f"currently finished iteration: {iteration+1}/{number_of_iterations} ", orange, None)
+                send_discord_notif("Continuing Training", f"currently finished iteration: {iteration+1}/{number_of_iterations} ", orange, None)
         except Exception as e:
             print("GOT ERROR:", str(e))
-            # send_discord_notif("ERROR WHILE TRAINING", str(e), red, f"Got the error at iteration:{iteration+1}/{number_of_iterations}")
+            send_discord_notif("ERROR WHILE TRAINING", str(e), red, f"Got the error at iteration:{iteration+1}/{number_of_iterations}")
             raise(e)
             
-        # send_discord_notif("Finished Training", f"Did {number_of_iterations} in batch sizes of {amount_per_it} without problem", green, None)
+        send_discord_notif("Finished Training", f"Did {number_of_iterations} in batch sizes of {amount_per_it} without problem", green, None)
 
     # --- TESTING ---
     if config.test:
@@ -372,15 +384,15 @@ if __name__ == "__main__":
             submit_filename = generate_submission(Y_test_pred)
         except Exception as e:
             print("GOT ERROR:",str(e))
-            # send_discord_notif("ERROR WHILE TESTING", str(e), red, f"Got the error while trying to predict on test set.")
+            send_discord_notif("ERROR WHILE TESTING", str(e), red, f"Got the error while trying to predict on test set.")
             raise(e)
 
-        # send_discord_notif("Finished to predict on test set", f"Everything ran without issues!", green, None)
+        send_discord_notif("Finished to predict on test set", f"Everything ran without issues!", green, None)
 
     
-    # if submit_to_kaggle:
-        # res = submit_preds_on_Kaggle(submit_filename, "")
-        # send_discord_notif("Uploaded results on Kaggle", f"{res}", green, None)
+    if submit_to_kaggle:
+        res = submit_preds_on_Kaggle(submit_filename, "")
+        send_discord_notif("Uploaded results on Kaggle", f"{res}", green, None)
 
 
     
