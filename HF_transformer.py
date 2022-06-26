@@ -340,8 +340,8 @@ if __name__ == "__main__":
         model = load_model_from_checkpoint(config.load_model)
 
     # Misc
-    submit_to_kaggle = config.autosubmit
-    discord_enabled =  config.discord
+    # submit_to_kaggle = config.autosubmit
+    # discord_enabled =  config.discord
         
 
     # --- TRAINING & VALIDATION ---
