@@ -32,17 +32,10 @@ red = 15158332
 green = 3066993
 orange = 15105570
 
-# CONSTANT VALUES
-device = C.DEVICE
-
-# project_path = C.PROJECT_PATH
-# print("The project folder path is: ", project_path)
-# experiment_path = C.EXPERIMENT_PATH
-# print("The experiment folder path is: ", experiment_path)
-# checkpoints_path = C.checkpoints_path
-# print("Model checkpoints will be saved in: ", checkpoints_path)
-
+# Global variables
 metric = load_metric("accuracy")    # metric to use
+train_dataset, val_dataset = None, None
+
 
 # DATASET CLASSES
 class TrainDataset(Dataset):
@@ -70,15 +63,13 @@ class TestDataset(Dataset):
         return len(self.encodings["input_ids"])     # number of items in the Dataset
 
 
-train_dataset, val_dataset = None, None
-
-
 def read_file(file_name_label_tuple, starting_line=0, end_line=0):
     fname, label = file_name_label_tuple
     tweets, labels = [], []
     with open( fname, 'r', encoding='utf-8') as f:
         tweets = [line for line in f.readlines()[starting_line:end_line]]
         labels = [label] * (end_line-starting_line)
+
     return(tweets, labels)
 
 def load_train_data(amount_per_batch, iteration):
@@ -115,6 +106,7 @@ def load_test_data():
         for line in f:
             line = line.partition(",")[2]   # this allows to get the text content only for each line of the file (see that the file starts with "n," where n is the line numbner); it parts the string into three strings as: before the arg, the arg, and after the arg
             tweets.append(line.rstrip())
+
     return tweets
 
 
@@ -124,7 +116,8 @@ def vectorize_data(tweets,train_indices,val_indices):
     # Important: we call fit_transform on the training set, and only transform on the validation set
     X_train = vectorizer.fit_transform(tweets[train_indices])
     X_val = vectorizer.transform(tweets[val_indices])
-    return X_train,X_val
+
+    return X_train, X_val
 
 def get_train_val_datasets(tweets, labels):
     nb_of_samples = len(tweets)
@@ -161,6 +154,7 @@ def get_test_dataset(tweets):
     print(f'{nb_of_samples} tweets loaded for testing.\n')
     tweets = tokenizer(tweets, max_length=256, padding="max_length", truncation=True)
     tweets = TestDataset(tweets)
+
     return tweets
 
 def compute_metrics(eval_pred): 
@@ -169,8 +163,8 @@ def compute_metrics(eval_pred):
 
     return metric.compute(predictions=predictions, references=labels)
     
-def train(model,train_dataset_param,val_dataset_param):
-    training_args = TrainingArguments(output_dir="./train_results", 
+def train(model, train_dataset_param, val_dataset_param):
+    training_args = TrainingArguments(output_dir=checkpoints_path, 
                                     per_device_train_batch_size=bs_train, 
                                     per_device_eval_batch_size=bs_eval, 
                                     learning_rate=lr, 
@@ -300,15 +294,23 @@ if __name__ == "__main__":
     # Get config
     config = Configuration.parse_cmd()
 
-    print(config.on_cluster)
     if config.on_cluster:
-        project_path = os.environ["CIL_PROJECT_PATH"] # for cluster; "./"  for local
-        experiment_path = os.environ["CIL_EXPERIMENTS_PATH"] # for cluster; "./"  for local
+        print("\nRunning on the cluster.")
+        project_path = os.environ["CIL_PROJECT_PATH"]   # see cluster .bashrc file for the environment variables  for local
+        experiment_path = os.environ["CIL_EXPERIMENTS_PATH"]    # see cluster .bashrc file for the environment variables "./"  for local
         checkpoints_path = experiment_path+"train_results/"
+        print("The project path is: ", project_path)
+        print("The experiment path is: ", experiment_path)
+        print("The model checkpoints will be saved at: ", checkpoints_path, "\n")
+
     else:
-        project_path = ""
-        experiment_path = "./Experiments/"
+        print("Running locally.")
+        project_path = "./"
+        experiment_path = "Experiments/"
         checkpoints_path = experiment_path+"train_results/"
+        print("The project path is: ", project_path)
+        print("The experiment path is: ", experiment_path)
+        print("The model checkpoints will be saved at: ", checkpoints_path)
 
 
     # Fix seeds for reproducibility
@@ -329,13 +331,14 @@ if __name__ == "__main__":
     use_most_freq_words = config.freq_words
     train_val_ratio = config.train_val_ratio
 
-    # Calculate values for the amount of tweet to work on during training   
+    # Calculate values for the number of tweets to work with during model training   
     amount_per_it = config.amount_per_it
     if use_full_dataset:
-        total_amount_of_tweets = 2500000
+        total_amount_of_tweets = 2500000    # max number of tweets there are in the full dataset
     else:
-        total_amount_of_tweets = 200000
+        total_amount_of_tweets = 200000     # max number of tweets there are in the size-reduced dataset
 
+    # if we don't want to use the complete dataset (whether the full one or the size-reduced one)
     if config.amount_of_data != 0:
         total_amount_of_tweets = config.amount_of_data
     
@@ -355,27 +358,30 @@ if __name__ == "__main__":
     submit_to_kaggle = config.autosubmit
     discord_enabled =  config.discord
         
+    
+    model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=2)
+    model.to(C.DEVICE)  # automatic if use the Trainer()
 
     # --- TRAINING & VALIDATION ---
     if config.train:
 
         number_of_iterations = int(np.ceil(total_amount_of_tweets / amount_per_it))
-        print(f"Going to do {number_of_iterations} iterations to do {total_amount_of_tweets} tweets in batch sizes of {amount_per_it}")
+        print(f"Going to do {number_of_iterations} iterations to do {total_amount_of_tweets} tweets in batch of {amount_per_it} samples.")
 
         send_discord_notif("Starting Training", f"Going to do {number_of_iterations} iterations\
-        to do {total_amount_of_tweets} tweets in batch sizes of {amount_per_it}", orange, None)
+        to do {total_amount_of_tweets} tweets in batch of {amount_per_it} samples", orange, None)
 
-        model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=2)
         try:
             for iteration in range(number_of_iterations)[config.start_at_it:]:
-                model = load_and_train(model,amount_per_it, iteration)
+                model = load_and_train(model, amount_per_it, iteration)
                 send_discord_notif("Continuing Training", f"currently finished iteration: {iteration+1}/{number_of_iterations} ", orange, None)
+                print(f"{iteration} iteration(s) done!")
         except Exception as e:
             print("GOT ERROR:", str(e))
             send_discord_notif("ERROR WHILE TRAINING", str(e), red, f"Got the error at iteration:{iteration+1}/{number_of_iterations}")
             raise(e)
             
-        send_discord_notif("Finished Training", f"Did {number_of_iterations} in batch sizes of {amount_per_it} without problem", green, None)
+        send_discord_notif("Finished Training", f"Did {number_of_iterations} in batch of {amount_per_it} samples without problem", green, None)
 
     # --- TESTING ---
     if config.test:
@@ -392,8 +398,5 @@ if __name__ == "__main__":
     
     if submit_to_kaggle:
         res = submit_preds_on_Kaggle(submit_filename, "")
-        send_discord_notif("Uploaded results on Kaggle", f"{res}", green, None)
+        send_discord_notif("Submitted results on Kaggle!", f"{res}", green, None)
 
-
-    
-   
