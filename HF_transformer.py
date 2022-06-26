@@ -20,9 +20,9 @@ import requests
 #
 
 # Handle configurations
-import config
-from config import Configuration
-from config import CONSTANTS as C
+import transformer_config
+from transformer_config import Configuration
+from transformer_config import CONSTANTS as C
 
 # DATASET CLASSES
 class TrainDataset(Dataset):
