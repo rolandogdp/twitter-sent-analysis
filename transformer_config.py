@@ -1,7 +1,3 @@
-## Configuration for the HF_transformer.py file
-
-# Code based on the Machine Perception 2022 course project 2 at ETH Zürich
-
 import argparse
 import os
 import pprint
