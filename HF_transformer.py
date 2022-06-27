@@ -178,7 +178,7 @@ def train(model, train_dataset_param, val_dataset_param):
                                     # warmup_steps=500,              # number of warmup steps for learning rate scheduler
                                     weight_decay=weight_decay,       # strength of weight decay
                                     logging_dir='./logs',            # directory for storing logs
-                                    logging_steps=100, 
+                                    logging_steps=100,
                                     num_train_epochs=n_epochs)
     
     if not (train_dataset_param is None) and not (val_dataset_param is None):
@@ -221,13 +221,11 @@ def generate_submission(Y_preds):
     results[:,0] = np.arange(1, nb_of_samples+1).astype(np.int32)  # save the ids
     results[:,1] = [-1 if elem == 0 else 1 for elem in Y_preds]  # save the test predictions
 
-    experiment_id = int(time.time())
-    experiment_date = time.ctime(experiment_id)
-    experiment_date_for_file_name = experiment_date.replace(" ", "_").replace(":", "h")[:-8] + experiment_date[-8:-5].replace(":", "m") + "s"
-
-    submission_results_path = experiment_date_for_file_name
-    final_filename = f"{project_path}test_results/{submission_results_path}-submission.csv"
-    np.savetxt(final_filename, results, fmt="%1d", delimiter=",", header = "Id,Prediction", comments = "")
+    test_results_path = experiments_results_path + "/test_results/"
+    print("\nPredictions on the test set saved in: ", test_results_path)
+    os.makedirs(test_results_path, exist_ok=True)    # create the folder(s) if needed
+    final_filename = f"{experiment_date_for_folder_name}-submission.csv"
+    np.savetxt(test_results_path + final_filename, results, fmt="%1d", delimiter=",", header = "Id,Prediction", comments = "")
     
     return final_filename
 
@@ -291,26 +289,33 @@ def submit_preds_on_Kaggle(submit_filename, msg):
 
 if __name__ == "__main__":
 
+    time_run = time.perf_counter()     # better to use perf_counter() than time()
+
     # Get config
     config = Configuration.parse_cmd()
 
+    # Prepare the folder where this experiment (i.e., program run) outputs and results will be saved
+    experiment_id = int(time.time())
+    experiment_date = time.ctime(experiment_id)
+    experiment_date_name = experiment_date.replace(" ", "_").replace(":", "h")[:-8] + experiment_date[-8:-5].replace(":", "m") + "s"
+    experiment_date_for_folder_name = "experiment-" + experiment_date_name
+
+    # Set the paths
     if config.on_cluster:
         print("\nRunning on the cluster.")
         project_path = os.environ["CIL_PROJECT_PATH"]   # see cluster .bashrc file for the environment variables  for local
-        experiment_path = os.environ["CIL_EXPERIMENTS_PATH"]    # see cluster .bashrc file for the environment variables "./"  for local
-        checkpoints_path = experiment_path+"train_results/"
-        print("The project path is: ", project_path)
-        print("The experiment path is: ", experiment_path)
-        print("The model checkpoints will be saved at: ", checkpoints_path, "\n")
-
+        experiment_path = os.environ["CIL_EXPERIMENTS_PATH"] + "Experiments/"   # see cluster .bashrc file for the environment variables "./"  for local
     else:
-        print("Running locally.")
+        print("\nRunning locally.")
         project_path = "./"
-        experiment_path = "Experiments/"
-        checkpoints_path = experiment_path+"train_results/"
-        print("The project path is: ", project_path)
-        print("The experiment path is: ", experiment_path)
-        print("The model checkpoints will be saved at: ", checkpoints_path)
+        experiment_path = "./" + "Experiments/"
+
+    experiments_results_path = experiment_path + experiment_date_for_folder_name
+    os.makedirs(experiments_results_path, exist_ok=True)    # create the experiment folder(s) needed
+    checkpoints_path = experiments_results_path + "/checkpoints/"
+    print("The project path is: ", project_path)
+    print("The experiment path is: ", experiment_path)
+    print("The model checkpoints will be saved at: ", checkpoints_path, "\n")
 
 
     # Fix seeds for reproducibility
@@ -322,7 +327,7 @@ if __name__ == "__main__":
 
     # Save the command line that was used to run this file
     cmd = sys.argv[0] + ' ' + ' '.join(sys.argv[1:])
-    with open(os.path.join(project_path, 'cmd.txt'), 'w') as f:  # NOT DONE: need to create a model directory for each model
+    with open(os.path.join(experiments_results_path, 'cmd.txt'), 'w') as f:  # NOT DONE: need to create a model directory for each model
         f.write(cmd)
 
     # Data
@@ -357,10 +362,11 @@ if __name__ == "__main__":
     # Misc
     submit_to_kaggle = config.autosubmit
     discord_enabled =  config.discord
-        
-    
+
+    # Create the model
     model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=2)
     model.to(C.DEVICE)  # automatic if use the Trainer()
+    print("\nRunning on", C.DEVICE, "\n")
 
     # --- TRAINING & VALIDATION ---
     if config.train:
@@ -375,7 +381,7 @@ if __name__ == "__main__":
             for iteration in range(number_of_iterations)[config.start_at_it:]:
                 model = load_and_train(model, amount_per_it, iteration)
                 send_discord_notif("Continuing Training", f"currently finished iteration: {iteration+1}/{number_of_iterations} ", orange, None)
-                print(f"{iteration} iteration(s) done!")
+                print(f"{iteration+1} iteration(s) done!")
         except Exception as e:
             print("GOT ERROR:", str(e))
             send_discord_notif("ERROR WHILE TRAINING", str(e), red, f"Got the error at iteration:{iteration+1}/{number_of_iterations}")
@@ -399,4 +405,7 @@ if __name__ == "__main__":
     if submit_to_kaggle:
         res = submit_preds_on_Kaggle(submit_filename, "")
         send_discord_notif("Submitted results on Kaggle!", f"{res}", green, None)
+
+    time_run = time.perf_counter() - time_run
+    print(f"The program took {str(time_run/60)[:3]} minutes to run.")
 

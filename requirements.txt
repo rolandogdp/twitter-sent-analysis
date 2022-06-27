@@ -9,3 +9,4 @@ torchvision
 datascience
 folium
 datasets
+requests
