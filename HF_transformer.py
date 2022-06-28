@@ -158,7 +158,7 @@ def get_test_dataset(tweets):
     return tweets
 
 def compute_metrics(eval_pred): 
-    logits, labels = eval_pred
+    logits, labels = eval_pred      # here, we have to get rid of the second element (neutral class) of the logits before taking the softmax IF we want to only predict neg/pos
     predictions = np.argmax(logits, axis=-1)
 
     return metric.compute(predictions=predictions, references=labels)
@@ -291,18 +291,19 @@ def submit_preds_on_Kaggle(submit_filename, msg):
 
 if __name__ == "__main__":
 
+    # To time the duration of the experiment
     time_run = time.perf_counter()     # better to use perf_counter() than time()
 
-    # Get config
+    # Get the config
     config = Configuration.parse_cmd()
 
     # Prepare the folder where this experiment (i.e., program run) outputs and results will be saved
-    experiment_id = int(time.time())
+    experiment_id = int(time_run)
     experiment_date = time.ctime(experiment_id)
     experiment_date_name = experiment_date.replace(" ", "_").replace(":", "h")[:-8] + experiment_date[-8:-5].replace(":", "m") + "s"
     experiment_date_for_folder_name = "experiment-" + experiment_date_name
 
-    # Set the paths
+    # Prepare and set the paths
     if config.on_cluster:
         print("\nRunning on the cluster.")
         project_path = os.environ["CIL_PROJECT_PATH"]   # see cluster .bashrc file for the environment variables
@@ -327,7 +328,7 @@ if __name__ == "__main__":
     torch.manual_seed(SEED)
     torch.backends.cudnn.deterministic = False
 
-    # Save the command line that was used to run this file
+    # Save in the experiment folder the command line that was used to run this program
     cmd = sys.argv[0] + ' ' + ' '.join(sys.argv[1:])
     with open(os.path.join(experiments_results_path, 'cmd.txt'), 'w') as f:  # NOT DONE: need to create a model directory for each model
         f.write(cmd)
@@ -355,6 +356,10 @@ if __name__ == "__main__":
         if total_amount_of_tweets > 2500000:
             total_amount_of_tweets = 2500000 
     
+    number_of_iterations = int(np.ceil(total_amount_of_tweets / amount_per_it))
+    print(f"We will use {total_amount_of_tweets} tweets in total. {int(train_val_ratio * total_amount_of_tweets)} for training and {int(total_amount_of_tweets * (1-train_val_ratio))} for validation.")
+    print(f"{amount_per_it} tweets will be used for each of the {number_of_iterations} iterations (i.e., in each subset that is split in training/validation).")
+
     # Model
     n_epochs = config.n_epochs
     bs_train = config.bs_train
@@ -379,23 +384,22 @@ if __name__ == "__main__":
     # --- TRAINING & VALIDATION ---
     if config.train:
 
-        number_of_iterations = int(np.ceil(total_amount_of_tweets / amount_per_it))
-        print(f"Going to do {number_of_iterations} iterations to do {total_amount_of_tweets} tweets in batch of {amount_per_it} samples.")
+        print(f"Going to iterate over {number_of_iterations} subsets of {amount_per_it} samples/tweets (separated for training/validation) to see {total_amount_of_tweets} in total.")
 
-        send_discord_notif("Starting Training", f"Going to do {number_of_iterations} iterations\
-        to do {total_amount_of_tweets} tweets in batch of {amount_per_it} samples", orange, None)
+        send_discord_notif("Starting Training", f"Going to iterate over {number_of_iterations} subsets of {amount_per_it} samples/tweets (separated for training/validation) to see {total_amount_of_tweets} in total.", orange, None)
 
         try:
             for iteration in range(number_of_iterations)[config.start_at_it:]:
                 model = load_and_train(model, amount_per_it, iteration)
                 send_discord_notif("Continuing Training", f"currently finished iteration: {iteration+1}/{number_of_iterations} ", orange, None)
-                print(f"{iteration+1} iteration(s) done!")
+                print(f"{iteration+1} out of {number_of_iterations} iteration(s) done!")
         except Exception as e:
             print("GOT ERROR:", str(e))
             send_discord_notif("ERROR WHILE TRAINING", str(e), red, f"Got the error at iteration:{iteration+1}/{number_of_iterations}")
             raise(e)
             
-        send_discord_notif("Finished Training", f"Did {number_of_iterations} in batch of {amount_per_it} samples without problem", green, None)
+        send_discord_notif("Finished Training", f"Used {number_of_iterations} subsets of {amount_per_it} samples (i.e., tweets) without problem. Used {total_amount_of_tweets} in total.", green, None)
+        print(f"Finished Training. Used {number_of_iterations} subsets of {amount_per_it} samples (i.e., tweets) without problem. Used {total_amount_of_tweets} tweets in total.\n")
 
     # --- TESTING ---
     if config.test:
