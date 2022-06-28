@@ -165,17 +165,18 @@ def compute_metrics(eval_pred):
     
 def train(model, train_dataset_param, val_dataset_param):
     training_args = TrainingArguments(output_dir=checkpoints_path, 
+                                    overwrite_output_dir=True,
                                     per_device_train_batch_size=bs_train, 
                                     per_device_eval_batch_size=bs_eval, 
                                     learning_rate=lr, 
-                                    evaluation_strategy="steps",    # "epochs"
+                                    evaluation_strategy="steps",    # "steps"
+                                    save_strategy="steps",
                                     gradient_accumulation_steps=4,
-                                    gradient_checkpointing=True,
-                                    overwrite_output_dir=True,
+                                    # gradient_checkpointing=True,
                                     save_total_limit=2,
                                     fp16=fp16,
                                     seed=SEED,
-                                    # warmup_steps=500,              # number of warmup steps for learning rate scheduler
+                                    warmup_steps=500,              # number of warmup steps for learning rate scheduler
                                     weight_decay=weight_decay,       # strength of weight decay
                                     logging_dir='./logs',            # directory for storing logs
                                     logging_steps=500,
@@ -197,7 +198,7 @@ def train(model, train_dataset_param, val_dataset_param):
 
 def load_model_from_checkpoint(selected_checkpoint):
     model_path = checkpoints_path+f"checkpoint-{selected_checkpoint}"
-    model = AutoModelForSequenceClassification.from_pretrained(model_path, num_labels=2)
+    model = AutoModelForSequenceClassification.from_pretrained(model_path, num_labels=config.num_labels)
     print(f"Loaded model from: {model_path}")
     
     return model
@@ -205,7 +206,7 @@ def load_model_from_checkpoint(selected_checkpoint):
 def load_model_from_path(model_path):
     print(f"Loaded model from: {model_path}")
     
-    return AutoModelForSequenceClassification.from_pretrained(model_path, num_labels=2)
+    return AutoModelForSequenceClassification.from_pretrained(model_path, num_labels=config.num_labels)
 
 def test(model):
     test_trainer = Trainer(model)
@@ -234,7 +235,7 @@ def load_and_train(model, amount_per_batch, iteration):
     # Load TRAINING-VALIDATION DATA
     
     if model is None:
-        model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=2)
+        model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=config.num_labels)
 
     tweets, labels = load_train_data(amount_per_batch, iteration)
     train_dataset, val_dataset = get_train_val_datasets(tweets, labels)
@@ -371,7 +372,7 @@ if __name__ == "__main__":
     discord_enabled =  config.discord
 
     # Create the model
-    model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=2)
+    model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=config.num_labels)
     model.to(C.DEVICE)  # automatic if use the Trainer()
     print("\nRunning on", C.DEVICE, "\n")
 

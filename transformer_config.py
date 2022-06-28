@@ -64,6 +64,7 @@ class Configuration(object):
         parser.add_argument("--train", default=False, action="store_true", help='Train a model')
 
         # Data
+        parser.add_argument('--num_labels', type=int, default=2, help='How many different classes there are to predict')
         parser.add_argument("--full_data", default=False, action="store_true", help='Use the full dataset')
         parser.add_argument('--amount_of_data', type=int, default=0, help='Amount of Data')
         parser.add_argument('--amount_per_it', type=int, default=10000, help='Amount of data to load on each iteration')
@@ -76,11 +77,11 @@ class Configuration(object):
         
         # Learning args
         parser.add_argument('--train_val_ratio', type=float, default=0.95, help='The training/validation ratio to use for the given dataset')
-        parser.add_argument('--lr', type=float, default=1e-4, help='Learning rate')
+        parser.add_argument('--lr', type=float, default=2e-4, help='Learning rate')
         parser.add_argument('--n_epochs', type=int, default=2, help='Number of train epochs')
         parser.add_argument('--weight_decay', type=float, default=0.01, help='Weight decay')
         parser.add_argument('--bs_train', type=int, default=32, help='Batch size for the training set')
-        parser.add_argument('--bs_eval', type=int, default=16, help='Batch size for validation/test set')
+        parser.add_argument('--bs_eval', type=int, default=64, help='Batch size for validation/test set')
         parser.add_argument("--fp16", default=False, action="store_true", help='Uses fp16 for training (Not always supported)')
         
         config = parser.parse_args()
