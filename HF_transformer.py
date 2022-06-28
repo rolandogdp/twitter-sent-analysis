@@ -168,7 +168,7 @@ def train(model, train_dataset_param, val_dataset_param):
                                     per_device_train_batch_size=bs_train, 
                                     per_device_eval_batch_size=bs_eval, 
                                     learning_rate=lr, 
-                                    evaluation_strategy="epoch",
+                                    evaluation_strategy="steps",    # "epochs"
                                     gradient_accumulation_steps=4,
                                     gradient_checkpointing=True,
                                     overwrite_output_dir=True,
@@ -178,7 +178,8 @@ def train(model, train_dataset_param, val_dataset_param):
                                     # warmup_steps=500,              # number of warmup steps for learning rate scheduler
                                     weight_decay=weight_decay,       # strength of weight decay
                                     logging_dir='./logs',            # directory for storing logs
-                                    logging_steps=100,
+                                    logging_steps=500,
+                                    load_best_model_at_end=True,
                                     num_train_epochs=n_epochs)
     
     if not (train_dataset_param is None) and not (val_dataset_param is None):
@@ -303,8 +304,8 @@ if __name__ == "__main__":
     # Set the paths
     if config.on_cluster:
         print("\nRunning on the cluster.")
-        project_path = os.environ["CIL_PROJECT_PATH"]   # see cluster .bashrc file for the environment variables  for local
-        experiment_path = os.environ["CIL_EXPERIMENTS_PATH"] + "Experiments/"   # see cluster .bashrc file for the environment variables "./"  for local
+        project_path = os.environ["CIL_PROJECT_PATH"]   # see cluster .bashrc file for the environment variables
+        experiment_path = os.environ["CIL_EXPERIMENTS_PATH"] + "Experiments/"   # see cluster .bashrc file for the environment variables
     else:
         print("\nRunning locally.")
         project_path = "./"
@@ -338,6 +339,10 @@ if __name__ == "__main__":
 
     # Calculate values for the number of tweets to work with during model training   
     amount_per_it = config.amount_per_it
+    
+    if config.amount_of_data > 200000:
+        use_full_dataset = True  
+
     if use_full_dataset:
         total_amount_of_tweets = 2500000    # max number of tweets there are in the full dataset
     else:
@@ -346,6 +351,8 @@ if __name__ == "__main__":
     # if we don't want to use the complete dataset (whether the full one or the size-reduced one)
     if config.amount_of_data != 0:
         total_amount_of_tweets = config.amount_of_data
+        if total_amount_of_tweets > 2500000:
+            total_amount_of_tweets = 2500000 
     
     # Model
     n_epochs = config.n_epochs
@@ -407,5 +414,5 @@ if __name__ == "__main__":
         send_discord_notif("Submitted results on Kaggle!", f"{res}", green, None)
 
     time_run = time.perf_counter() - time_run
-    print(f"The program took {str(time_run/60)[:3]} minutes to run.")
+    print(f"The program took {str(time_run/60)[:6]} minutes to run.")
 
