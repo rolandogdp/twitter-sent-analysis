@@ -1,3 +1,4 @@
+.gitignore
 new-venv
 old
 test-results
