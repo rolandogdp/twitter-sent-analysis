@@ -15,7 +15,10 @@ from transformers import AutoTokenizer
 from transformers import AutoModelForSequenceClassification
 from transformers import TrainingArguments     # https://huggingface.co/transformers/v3.0.2/main_classes/trainer.html#transformers.TFTrainingArguments
 from transformers import Trainer    # https://huggingface.co/transformers/v3.0.2/main_classes/trainer
+<<<<<<< HEAD
 from transformers import DebertaV2Tokenizer, DebertaV2ForSequenceClassification
+=======
+>>>>>>> dfb86bfb683ced261592fd6336b5874046b832f8
 from transformers import pipeline
 from datasets import load_metric
 
@@ -33,10 +36,22 @@ red = 15158332
 green = 3066993
 orange = 15105570
 
+<<<<<<< HEAD
 # Global variables
 metric = load_metric("accuracy")    # metric to use
 train_dataset, val_dataset = None, None
 
+=======
+# CONSTANT VALUES
+device = C.DEVICE
+project_path = C.PROJECT_PATH
+print(project_path)
+experiment_path = C.EXPERIMENT_PATH
+print(experiment_path)
+checkpoints_path = C.checkpoints_path
+print(checkpoints_path)
+metric = load_metric("accuracy")
+>>>>>>> dfb86bfb683ced261592fd6336b5874046b832f8
 
 # DATASET CLASSES
 class TrainDataset(Dataset):
@@ -46,7 +61,11 @@ class TrainDataset(Dataset):
 
     def __getitem__(self, idx):
         item = {key: torch.tensor(value[idx]) for key, value in self.encodings.items()}
+<<<<<<< HEAD
         item['labels'] = self.labels[idx].clone().detach()
+=======
+        item['labels'] = torch.tensor(self.labels[idx]).clone().detach()
+>>>>>>> dfb86bfb683ced261592fd6336b5874046b832f8
         return item
 
     def __len__(self):
@@ -61,6 +80,7 @@ class TestDataset(Dataset):
         return item
 
     def __len__(self):
+<<<<<<< HEAD
         return len(self.encodings["input_ids"])     # number of items in the Dataset
 
 
@@ -70,9 +90,26 @@ def read_file(file_name_label_tuple, starting_line=0, end_line=0):
     with open( fname, 'r', encoding='utf-8') as f:
         tweets = [line for line in f.readlines()[starting_line:end_line]]
         labels = [label] * (end_line-starting_line)
+=======
+        return len(self.encodings["input_ids"])
+
+
+train_dataset, val_dataset = None, None
+>>>>>>> dfb86bfb683ced261592fd6336b5874046b832f8
 
     return(tweets, labels)
 
+<<<<<<< HEAD
+=======
+def read_file(file_name_label_tuple, starting_line=0, end_line=0):
+    fname, label = file_name_label_tuple
+    tweets, labels = [], []
+    with open( fname, 'r', encoding='utf-8') as f:
+        tweets = [line for line in f.readlines()[starting_line:end_line] ]
+        labels = [label] * (end_line-starting_line)
+    return(tweets, labels)
+
+>>>>>>> dfb86bfb683ced261592fd6336b5874046b832f8
 def load_train_data(amount_per_batch, iteration):
  
     if use_full_dataset == True:
@@ -87,7 +124,11 @@ def load_train_data(amount_per_batch, iteration):
     
     starting_line = iteration * amount_per_batch
     end_line = starting_line + amount_per_batch
+<<<<<<< HEAD
     print(f"Going to read {amount_per_batch*2} lines ({amount_per_batch} in each of the pos and neg datasets), starting_line:{starting_line}, end_line:{end_line}")
+=======
+    print(f"Going to read {amount_per_batch*2} lines, starting_line:{starting_line}, end_line:{end_line}")
+>>>>>>> dfb86bfb683ced261592fd6336b5874046b832f8
     tweets, labels = read_file((X_train_neg_path, 0), starting_line=starting_line, end_line=end_line)
     tweets_2, labels_2 = read_file((X_train_pos_path, 1), starting_line=starting_line, end_line=end_line)
     tweets += tweets_2
@@ -107,7 +148,10 @@ def load_test_data():
         for line in f:
             line = line.partition(",")[2]   # this allows to get the text content only for each line of the file (see that the file starts with "n," where n is the line numbner); it parts the string into three strings as: before the arg, the arg, and after the arg
             tweets.append(line.rstrip())
+<<<<<<< HEAD
 
+=======
+>>>>>>> dfb86bfb683ced261592fd6336b5874046b832f8
     return tweets
 
 
@@ -118,9 +162,13 @@ def vectorize_data(tweets,train_indices,val_indices):
     X_train = vectorizer.fit_transform(tweets[train_indices])
     X_val = vectorizer.transform(tweets[val_indices])
 
+<<<<<<< HEAD
     return X_train, X_val
 
 def get_train_val_data(tweets, labels):
+=======
+def get_train_val_datasets(tweets, labels):
+>>>>>>> dfb86bfb683ced261592fd6336b5874046b832f8
     nb_of_samples = len(tweets)
     shuffled_indices = np.random.permutation(nb_of_samples)
     split_idx = int(train_val_ratio * nb_of_samples)
@@ -155,11 +203,18 @@ def get_test_data(tweets):
     print(f'{nb_of_samples} tweets loaded for testing.\n')
     tweets = tokenizer(tweets, max_length=256, padding="max_length", truncation=True)
     tweets = TestDataset(tweets)
+<<<<<<< HEAD
 
     return tweets
 
 def compute_metrics(eval_pred): 
     logits, labels = eval_pred      # here, we have to get rid of the second element (neutral class) of the logits before taking the softmax IF we want to only predict neg/pos
+=======
+    return tweets
+
+def compute_metrics(eval_pred): 
+    logits, labels = eval_pred
+>>>>>>> dfb86bfb683ced261592fd6336b5874046b832f8
     predictions = np.argmax(logits, axis=-1)
 
     return metric.compute(predictions=predictions, references=labels)
@@ -199,7 +254,11 @@ def train(model, train_dataset_param, val_dataset_param):
 
 def load_model_from_checkpoint(selected_checkpoint):
     model_path = checkpoints_path+f"checkpoint-{selected_checkpoint}"
+<<<<<<< HEAD
     model = AutoModelForSequenceClassification.from_pretrained(model_path, num_labels=config.num_labels, local_files_only=False, ignore_mismatched_sizes=True)
+=======
+    model = AutoModelForSequenceClassification.from_pretrained(model_path, num_labels=2)
+>>>>>>> dfb86bfb683ced261592fd6336b5874046b832f8
     print(f"Loaded model from: {model_path}")
     
     return model
@@ -207,11 +266,19 @@ def load_model_from_checkpoint(selected_checkpoint):
 def load_model_from_path(model_path):
     print(f"Loaded model from: {model_path}")
     
+<<<<<<< HEAD
     return AutoModelForSequenceClassification.from_pretrained(model_path, num_labels=config.num_labels, local_files_only=False, ignore_mismatched_sizes=True)
 
 def test(model):
     test_trainer = Trainer(model)
     tweets = get_test_data(load_test_data())
+=======
+    return AutoModelForSequenceClassification.from_pretrained(model_path, num_labels=2)
+
+def test(model):
+    test_trainer = Trainer(model)
+    tweets = get_test_dataset(load_test_data())
+>>>>>>> dfb86bfb683ced261592fd6336b5874046b832f8
     raw_preds, _, _ = test_trainer.predict(tweets)     # only predictions to return, no label ids, no metrics; see HF Trainer doc
     Y_test_pred = np.argmax(raw_preds, axis=1)
     
@@ -224,22 +291,41 @@ def generate_submission(Y_preds):
     results[:,0] = np.arange(1, nb_of_samples+1).astype(np.int32)  # save the ids
     results[:,1] = [-1 if elem == 0 else 1 for elem in Y_preds]  # save the test predictions
 
+<<<<<<< HEAD
     test_results_path = experiments_results_path + "/test_results/"
     print("\nPredictions on the test set saved in: ", test_results_path)
     os.makedirs(test_results_path, exist_ok=True)    # create the folder(s) if needed
     final_filename = f"{experiment_date_for_folder_name}-submission.csv"
     np.savetxt(test_results_path + final_filename, results, fmt="%1d", delimiter=",", header = "Id,Prediction", comments = "")
+=======
+    experiment_id = int(time.time())
+    experiment_date = time.ctime(experiment_id)
+    experiment_date_for_file_name = experiment_date.replace(" ", "_").replace(":", "h")[:-8] + experiment_date[-8:-5].replace(":", "m") + "s"
+
+    submission_results_path = experiment_date_for_file_name
+    final_filename = f"{project_path}test_results/{submission_results_path}-submission.csv"
+    np.savetxt(final_filename, results, fmt="%1d", delimiter=",", header = "Id,Prediction", comments = "")
+>>>>>>> dfb86bfb683ced261592fd6336b5874046b832f8
     
     return final_filename
 
 def load_and_train(model, amount_per_batch, iteration):
+<<<<<<< HEAD
+=======
+    # Load TRAINING-VALIDATION DATA
+>>>>>>> dfb86bfb683ced261592fd6336b5874046b832f8
     
     if model is None:
         model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=config.num_labels, local_files_only=False, ignore_mismatched_sizes=True)
 
+<<<<<<< HEAD
     # Load training & validation data
     tweets, labels = load_train_data(amount_per_batch, iteration)
     train_dataset, val_dataset = get_train_val_data(tweets, labels)
+=======
+    tweets, labels = load_train_data(amount_per_batch, iteration)
+    train_dataset, val_dataset = get_train_val_datasets(tweets, labels)
+>>>>>>> dfb86bfb683ced261592fd6336b5874046b832f8
     tweets, labels = [], []
 
     # Free some memory
@@ -252,7 +338,11 @@ def load_and_train(model, amount_per_batch, iteration):
     return model
 
 # DISCORD
+<<<<<<< HEAD
 def send_discord_notif(title, content, color, error=None):
+=======
+def send_discord_notif(title,content,color,error=None):
+>>>>>>> dfb86bfb683ced261592fd6336b5874046b832f8
     if not discord_enabled:
         return
     if error is None:
@@ -285,8 +375,12 @@ def submit_preds_on_Kaggle(submit_filename, msg):
     api = kaggle.api
     api.get_config_value("username")
     res = api.competition_submit(submit_filename, f"Automatic File submission test: {msg}", "cil-text-classification-2022")
+<<<<<<< HEAD
     print("res: ", res)
     
+=======
+    print("res:",res)
+>>>>>>> dfb86bfb683ced261592fd6336b5874046b832f8
     return res
 
 # TRAINING
@@ -326,6 +420,7 @@ def run_testing(model):
 
 if __name__ == "__main__":
 
+<<<<<<< HEAD
     torch.cuda.empty_cache()    
 
     # To time the duration of the experiment
@@ -358,6 +453,11 @@ if __name__ == "__main__":
     print("The model checkpoints will be saved at: ", checkpoints_path, "\n")
 
 
+=======
+    # Get config
+    config = Configuration.parse_cmd()
+
+>>>>>>> dfb86bfb683ced261592fd6336b5874046b832f8
     # Fix seeds for reproducibility
     SEED = config.seed
     random.seed(SEED)
@@ -365,9 +465,15 @@ if __name__ == "__main__":
     torch.manual_seed(SEED)
     torch.backends.cudnn.deterministic = False
 
+<<<<<<< HEAD
     # Save in the experiment folder the command line that was used to run this program
     cmd = sys.argv[0] + ' ' + ' '.join(sys.argv[1:])
     with open(os.path.join(experiments_results_path, 'cmd.txt'), 'w') as f:  # NOT DONE: need to create a model directory for each model
+=======
+    # Save the command line that was used to run this file
+    cmd = sys.argv[0] + ' ' + ' '.join(sys.argv[1:])
+    with open(os.path.join(project_path, 'cmd.txt'), 'w') as f:  # NOT DONE: need to create a model directory for each model
+>>>>>>> dfb86bfb683ced261592fd6336b5874046b832f8
         f.write(cmd)
 
     # Data
@@ -375,6 +481,7 @@ if __name__ == "__main__":
     model_name = config.model_name 
     use_most_freq_words = config.freq_words
     train_val_ratio = config.train_val_ratio
+<<<<<<< HEAD
 
     # Calculate values for the number of tweets to work with during model training   
     amount_per_it = config.amount_per_it
@@ -386,6 +493,74 @@ if __name__ == "__main__":
         total_amount_of_tweets = 2500000    # max number of tweets there are in the full dataset
     else:
         total_amount_of_tweets = 200000     # max number of tweets there are in the size-reduced dataset
+=======
+
+    # Calculate values for the amount of tweet to work on during training   
+    amount_per_it = config.amount_per_it
+    if use_full_dataset:
+        total_amount_of_tweets = 2500000
+    else:
+        total_amount_of_tweets = 200000
+
+    if config.amount_of_data != 0:
+        total_amount_of_tweets = config.amount_of_data
+    
+    # Model
+    n_epochs = config.n_epochs
+    bs_train = config.bs_train
+    bs_eval = config.bs_eval
+    lr = config.lr
+    fp16 = config.fp16
+    weight_decay = config.weight_decay
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+
+    if not (config.load_model is None):
+        model = load_model_from_checkpoint(config.load_model)
+
+    # Misc
+    submit_to_kaggle = config.autosubmit
+    discord_enabled =  config.discord
+        
+
+    # --- TRAINING & VALIDATION ---
+    if config.train:
+
+        number_of_iterations = int(np.ceil(total_amount_of_tweets / amount_per_it))
+        print(f"Going to do {number_of_iterations} iterations to do {total_amount_of_tweets} tweets in batch sizes of {amount_per_it}")
+
+        send_discord_notif("Starting Training", f"Going to do {number_of_iterations} iterations\
+        to do {total_amount_of_tweets} tweets in batch sizes of {amount_per_it}", orange, None)
+
+        model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=2)
+        try:
+            for iteration in range(number_of_iterations)[config.start_at_it:]:
+                model = load_and_train(model,amount_per_it, iteration)
+                send_discord_notif("Continuing Training", f"currently finished iteration: {iteration+1}/{number_of_iterations} ", orange, None)
+        except Exception as e:
+            print("GOT ERROR:", str(e))
+            send_discord_notif("ERROR WHILE TRAINING", str(e), red, f"Got the error at iteration:{iteration+1}/{number_of_iterations}")
+            raise(e)
+            
+        send_discord_notif("Finished Training", f"Did {number_of_iterations} in batch sizes of {amount_per_it} without problem", green, None)
+
+    # --- TESTING ---
+    if config.test:
+        try:
+            Y_test_pred = test(model)
+            submit_filename = generate_submission(Y_test_pred)
+        except Exception as e:
+            print("GOT ERROR:",str(e))
+            send_discord_notif("ERROR WHILE TESTING", str(e), red, f"Got the error while trying to predict on test set.")
+            raise(e)
+
+        send_discord_notif("Finished to predict on test set", f"Everything ran without issues!", green, None)
+
+    
+    if submit_to_kaggle:
+        res = submit_preds_on_Kaggle(submit_filename, "")
+        send_discord_notif("Uploaded results on Kaggle", f"{res}", green, None)
+
+>>>>>>> dfb86bfb683ced261592fd6336b5874046b832f8
 
     # if we don't want to use the complete dataset (whether the full one or the size-reduced one)
     if config.amount_of_data != 0:
