@@ -404,7 +404,7 @@ if __name__ == "__main__":
     lr = config.lr
     fp16 = config.fp16
     weight_decay = config.weight_decay
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True)
 
     if not (config.load_model is None):
         model = load_model_from_checkpoint(config.load_model)
