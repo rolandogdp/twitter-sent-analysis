@@ -1,11 +1,10 @@
+# torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu116
 numpy
 pandas
 sklearn
 matplotlib
-torch
 scipy
 transformers
-torchvision
 datascience
 folium
 datasets
