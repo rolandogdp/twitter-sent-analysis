@@ -1,5 +1,5 @@
 ## CIL 2022 Project: Sentiment Analysis on tweets
-
+import wandb
 import os
 import sys
 
@@ -20,8 +20,10 @@ from transformers import DebertaV2Tokenizer, DebertaV2ForSequenceClassification
 from transformers import pipeline
 from transformers import EarlyStoppingCallback
 from datasets import load_metric
-from trainers.mytrainer import MyTrainer
-#from models.myclassifier import MyClassifier
+from trainers.myScalTrainer import MyScalTrainer
+from models.myScalModel import MyScalModel
+from transformers import PreTrainedModel
+from transformers import AutoConfig
 
 import time
 import requests
@@ -201,12 +203,12 @@ def train(model, train_dataset_param, val_dataset_param):
                                     learning_rate=lr, 
                                     evaluation_strategy="steps",    # "steps"
                                     save_strategy="steps",
-                                    gradient_accumulation_steps=2,
+                                    gradient_accumulation_steps=1,
                                     # gradient_checkpointing=True,
                                     fp16=fp16,
                                     fp16_opt_level='O1',
-                                    adam_epsilon=1e-6,
-                                    warmup_ratio=0.1,
+                                    adam_epsilon=1e-9,
+                                    warmup_ratio=0.2,
                                     #optim="adamw_torch",
                                     seed=SEED,
                                     # warmup_steps=500,              # number of warmup steps for learning rate scheduler
@@ -214,29 +216,31 @@ def train(model, train_dataset_param, val_dataset_param):
                                     logging_dir='./logs',            # directory for storing logs
                                     logging_steps=config.eval_every,
                                     load_best_model_at_end=True,
-                                    save_steps=config.eval_every*9,
+                                    save_steps=config.eval_every*10,
                                     num_train_epochs=n_epochs,
                                     metric_for_best_model = "eval_loss",
-                                    greater_is_better = False
+                                    greater_is_better = False,
+                                    #wandb
+                                    report_to='wandb'
                                     )
     
     if not (train_dataset_param is None) and not (val_dataset_param is None):
         train_dataset, val_dataset = train_dataset_param, val_dataset_param
 
-    trainer = MyTrainer(
+    trainer = MyScalTrainer(
       model=model,
       args=training_args,
       train_dataset=train_dataset,
       eval_dataset=val_dataset,
       compute_metrics=compute_metrics,
-      callbacks = [EarlyStoppingCallback(early_stopping_patience=3)]
     )
     trainer.train()
     return 
 
 def load_model_from_checkpoint(selected_checkpoint):
     model_path = selected_checkpoint
-    model = AutoModelForSequenceClassification.from_pretrained(model_path, num_labels=config.num_labels, local_files_only=False, ignore_mismatched_sizes=True)
+    cfg = AutoConfig.from_pretrained(model_path)
+    model = AutoModel.from_pretrained(model_path)
     print(f"Loaded model from: {model_path}")
     
     return model
@@ -247,7 +251,7 @@ def load_model_from_path(model_path):
     return AutoModelForSequenceClassification.from_pretrained(model_path, num_labels=config.num_labels, local_files_only=False, ignore_mismatched_sizes=True)
 
 def test(model):
-    test_trainer = Trainer(model)
+    test_trainer = MyScalTrainer(model)
     tweets = get_test_data(load_test_data())
     raw_preds, _, _ = test_trainer.predict(tweets)     # only predictions to return, no label ids, no metrics; see HF Trainer doc
     Y_test_pred = np.argmax(raw_preds, axis=1)
@@ -337,7 +341,7 @@ def run_training(model):
             send_discord_notif("Continuing Training", f"currently finished subset iteration: {iteration+1}/{number_of_iterations} ", orange, None)
             print(f"{iteration+1} out of {number_of_iterations} subset iteration(s) done!")
             curr_iter = curr_iter + 1
-            lr = lr - config.lr/(number_of_iterations*1.0)
+            lr = lr - config.lr/((number_of_iterations+1.0)*1.0)
     except Exception as e:
         print("GOT ERROR:", str(e))
         send_discord_notif("ERROR WHILE TRAINING", str(e), red, f"Got the error at subset iteration: {iteration+1}/{number_of_iterations}")
@@ -364,7 +368,8 @@ def run_testing(model):
     return submit_filename
 
 if __name__ == "__main__":
-
+    wandb.init(project="twitter-sentiment-analysis-scal")
+    #os.environ["WANDB_DISABLED"] = "true"
     torch.cuda.empty_cache()    
     torch.autograd.set_detect_anomaly(True)
     # To time the duration of the experiment
@@ -454,9 +459,11 @@ if __name__ == "__main__":
 
     #data
     # Create the model
+    #if model is None:
+    #    model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=config.num_labels, local_files_only=False, ignore_mismatched_sizes=True)
     if model is None:
-        model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=config.num_labels, local_files_only=False, ignore_mismatched_sizes=True)
-
+        model = MyScalModel(model_name = model_name, num_labels=config.num_labels, epsilon=config.epsilon, alpha = config.alpha,
+                        beta = config.beta)
     model.to(C.DEVICE)  # automatic if use the Trainer()
     print("\nRunning on", C.DEVICE, " with ", torch.__version__, "\n")
 

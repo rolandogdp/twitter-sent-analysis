@@ -1,10 +1,11 @@
-## Code inspired by the 2022 Machine Perception course project skeleton file at ETH Zürich.
 # Configuration for the HF_transformer.py file
 
 import argparse
 import os
 import pprint
 import torch
+from os.path import join
+from yacs.config import CfgNode as CN
 
 class Constants(object):
     class __Constants:
@@ -29,7 +30,44 @@ class Constants(object):
 
 
 CONSTANTS = Constants()
-
+default = CN()
+#General
+default.tag = ''
+default.seed = 12345
+default.data_workers = 4
+default.print_every = 200
+default.eval_every = 400
+default.on_cluster = False
+#Kaggle
+default.autosubmit = False
+# Discord notifications bot
+default.discord = False
+# Run
+default.load_model = None
+default.test = False
+default.train = False
+# Data
+default.num_labels = 2
+default.full_data = False
+default.amount_of_data = 0
+default.amount_per_it = 10000
+default.start_at_it = 0
+default.aug_data = False
+default.freq_words = False
+#Model
+default.model_name = "bert-base-cased"
+default.feature_dim = 768
+# Learning args
+default.train_val_ratio = 0.95
+default.lr = 0.0002
+default.n_epochs = 2
+default.weight_decay = 0.01
+default.bs_train = 32
+default.bs_eval = 64
+default.fp16 = False
+default.epsilon = 0.1
+default.alpha = 0.5
+default.beta = 0.7
 
 class Configuration(object):
     "Config parameters to pass via the command line."
@@ -43,7 +81,7 @@ class Configuration(object):
     @staticmethod
     def parse_cmd():
         parser = argparse.ArgumentParser()
-
+        '''
         # General
         parser.add_argument('--tag', default='', help='A custom tag for this experiment')
         parser.add_argument('--seed', type=int, default=12345, help='Random number generator seed')     # for randomness; initially None
@@ -83,7 +121,12 @@ class Configuration(object):
         parser.add_argument('--bs_train', type=int, default=32, help='Batch size for the training set')
         parser.add_argument('--bs_eval', type=int, default=64, help='Batch size for validation/test set')
         parser.add_argument("--fp16", default=False, action="store_true", help='Uses fp16 for training (Not always supported)')
-        
-        config = parser.parse_args()
-        
-        return Configuration(vars(config))
+        '''
+
+        #using yaml file for configs
+        parser.add_argument('--cfg', type=str, default='configs/default_cpu.yaml', help='path to the configuration yaml file')
+        config_file = parser.parse_args()
+        config = default.clone()
+        config.merge_from_file(config_file.cfg)
+        return Configuration(config)
+        #return config.clone()

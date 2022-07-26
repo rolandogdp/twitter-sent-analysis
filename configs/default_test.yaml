@@ -1,0 +1,26 @@
+#General
+tag: 'GPU'
+data_workers: 16
+eval_every: 500
+on_cluster: True
+#Run
+test: True
+load_model: "/cluster/scratch/mezhang/Experiments/experiment-Wed_Jan_28_08h01m56s/checkpoints/iter-0/checkpoint-10000"
+train: False
+#data
+amount_per_it: 200000
+amount_of_data: 200000
+#Model
+model_name: "microsoft/deberta-v3-base"
+full_data: False
+#learning args
+train_val_ratio: 0.95
+lr: 0.00003
+n_epochs: 3
+weight_decay: 0.0
+bs_train: 16
+bs_eval: 128
+fp16: False
+epsilon: 0.1
+alpha: 0.5
+beta: 0.7

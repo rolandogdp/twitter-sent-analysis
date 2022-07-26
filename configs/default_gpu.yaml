@@ -1,0 +1,26 @@
+#General
+tag: 'GPU'
+data_workers: 16
+eval_every: 1000
+on_cluster: True
+#Run
+test: True
+load_model: None
+train: True
+#data
+amount_per_it: 100000
+amount_of_data: 100000
+#Model
+model_name: "microsoft/deberta-v3-base"
+full_data: True
+#learning args
+train_val_ratio: 0.95
+lr: 0.00005
+n_epochs: 2
+weight_decay: 0.
+bs_train: 16
+bs_eval: 16
+fp16: False
+epsilon: 0.2
+alpha: 0.5
+beta: 1.0
