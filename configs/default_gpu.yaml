@@ -8,8 +8,8 @@ test: True
 load_model: None
 train: True
 #data
-amount_per_it: 100000
-amount_of_data: 100000
+amount_per_it: 1250000
+amount_of_data: 2500000
 #Model
 model_name: "microsoft/deberta-v3-base"
 full_data: True
@@ -21,6 +21,6 @@ weight_decay: 0.
 bs_train: 16
 bs_eval: 16
 fp16: False
-epsilon: 0.2
-alpha: 0.5
+epsilon: 0.05
+alpha: 0.1
 beta: 1.0

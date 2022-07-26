@@ -93,7 +93,6 @@ class MyScalModel(PreTrainedModel):
 		self.pooler = ContextPooler(self.features_dim, 0.1)
 		self.output_dim = self.features_dim
 		self.classifier = nn.Linear(self.output_dim, self.num_labels)
-		self.layerNorm = nn.LayerNorm(self.config.hidden_size)
 		#For contrastive learning
 		self.mlp = nn.Sequential(
 			nn.Linear(self.features_dim, 1024),
@@ -163,7 +162,7 @@ class MyScalModel(PreTrainedModel):
 			#embeddingTrue.requires_grad = False
 			self.zero_grad();
 			grad2.requires_grad = False
-			embeddingAdversarial = self.layerNorm(fgm_attack(embeddingTrue, self.epsilon, grad2))
+			embeddingAdversarial = fgm_attack(embeddingTrue, self.epsilon, grad2)
 
 			#do adversarial pass
 			#embedding_output['embeddings'] = embeddingAdversarial
@@ -194,7 +193,7 @@ class MyScalModel(PreTrainedModel):
 			return ((loss, ) + output) if loss is not None else output
 
 		return SequenceClassifierOutput(
-			loss = (loss+0.5*loss_adversarial+self.alpha*loss_ct+self.beta*loss_kl).mean(), 
+			loss = (loss+loss_adversarial+self.alpha*loss_ct+self.beta*loss_kl).mean(), 
 			logits = logitsTrue,
 			#logitsAdversarial = logitsAdversarial,
 			hidden_states = encoder_outputs.hidden_states,

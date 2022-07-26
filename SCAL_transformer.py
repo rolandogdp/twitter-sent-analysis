@@ -208,7 +208,7 @@ def train(model, train_dataset_param, val_dataset_param):
                                     fp16=fp16,
                                     fp16_opt_level='O1',
                                     adam_epsilon=1e-9,
-                                    warmup_ratio=0.2,
+                                    warmup_ratio=0.05,
                                     #optim="adamw_torch",
                                     seed=SEED,
                                     # warmup_steps=500,              # number of warmup steps for learning rate scheduler
