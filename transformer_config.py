@@ -70,14 +70,16 @@ class Configuration(object):
         parser.add_argument('--amount_per_it', type=int, default=10000, help='Amount of data to load on each iteration')
         parser.add_argument('--start_at_it', type=int, default=0, help='Start at a certain iteration (usefull for resuming a training)')
         # parser.add_argument('--aug_data', default=False, action="store_true", help='If using the augmented data engineering or not.')
+        parser.add_argument("--use_HF_dataset_format", default=False, action="store_true", help='Use the cleaned HF dataset we created.')
         parser.add_argument("--freq_words", default=False, action="store_true", help='Use the most frequent words.')
+        parser.add_argument('--tokenizer_max_length', type=int, default=256, help='Set the tokenizer max_length parameter.')
 
         # Model
         parser.add_argument('--model_name', type=str, default="bert-base-cased", help='Default model name to load')     # "cardiffnlp/twitter-roberta-base-sentiment-latest"
         
         # Learning args
         parser.add_argument('--train_val_ratio', type=float, default=0.95, help='The training/validation ratio to use for the given dataset')
-        parser.add_argument('--lr', type=float, default=2e-4, help='Learning rate')
+        parser.add_argument('--lr', type=float, default=1e-4, help='Learning rate')
         parser.add_argument('--n_epochs', type=int, default=2, help='Number of train epochs')
         parser.add_argument('--weight_decay', type=float, default=0.01, help='Weight decay')
         parser.add_argument('--bs_train', type=int, default=16, help='Batch size for the training set')
