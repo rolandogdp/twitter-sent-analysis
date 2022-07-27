@@ -18,6 +18,9 @@
 *.jsonl
 *.txt
 
+new-venv
+twitter-dataset
+
 models.py 
 
 clean_transformer.py
