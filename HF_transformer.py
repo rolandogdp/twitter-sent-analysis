@@ -1,4 +1,5 @@
 ## CIL 2022 Project: Sentiment Analysis on tweets
+## Team: Klim, Rolando, Mengtao, Fabian
 
 import os
 import sys
@@ -15,12 +16,15 @@ from transformers import AutoTokenizer
 from transformers import AutoModelForSequenceClassification
 from transformers import TrainingArguments     # https://huggingface.co/transformers/v3.0.2/main_classes/trainer.html#transformers.TFTrainingArguments
 from transformers import Trainer    # https://huggingface.co/transformers/v3.0.2/main_classes/trainer
-from transformers import DebertaV2Tokenizer, DebertaV2ForSequenceClassification
+from transformers import DataCollatorForLanguageModeling
+
 from transformers import pipeline
 from datasets import load_metric
+from datasets import load_dataset
 
 import time
 import requests
+
 
 # Config file
 from transformer_config import Configuration
@@ -35,7 +39,6 @@ orange = 15105570
 
 # Global variables
 metric = load_metric("accuracy")    # metric to use
-train_dataset, val_dataset = None, None
 
 
 # DATASET CLASSES
@@ -63,7 +66,7 @@ class TestDataset(Dataset):
     def __len__(self):
         return len(self.encodings["input_ids"])     # number of items in the Dataset
 
-
+# Read a file containing tweets and store them as well as their respective labels
 def read_file(file_name_label_tuple, starting_line=0, end_line=0):
     fname, label = file_name_label_tuple
     tweets, labels = [], []
@@ -73,6 +76,7 @@ def read_file(file_name_label_tuple, starting_line=0, end_line=0):
 
     return(tweets, labels)
 
+# Store the training data, tweets and labels, in numpy arrays
 def load_train_data(amount_per_batch, iteration):
  
     if use_full_dataset == True:
@@ -96,10 +100,12 @@ def load_train_data(amount_per_batch, iteration):
     labels += labels_2
     labels_2 = []
     del(labels_2)
+        
     print(f"Loaded {len(tweets)} tweets!")
     
     return np.array(tweets), np.array(labels)
 
+# Store the testing data (tweets) in a numpy array
 def load_test_data():
     filename = project_path + "test_data.txt"
     tweets = []
@@ -110,8 +116,8 @@ def load_test_data():
 
     return tweets
 
-
-def vectorize_data(tweets,train_indices,val_indices):
+# Vectorize the data 
+def vectorize_data(tweets, train_indices, val_indices):
     vectorizer = CountVectorizer(max_features=5000)   # 5000
 
     # Important: we call fit_transform on the training set, and only transform on the validation set
@@ -139,8 +145,8 @@ def get_train_val_data(tweets, labels):
     Y_train = labels[train_indices]
     Y_val = labels[val_indices]
     
-    X_train = tokenizer(X_train.tolist(), max_length=256, padding="max_length", truncation=True)
-    X_val = tokenizer(X_val.tolist(), max_length=256, padding="max_length", truncation=True)
+    X_train = tokenizer(X_train.tolist(), max_length=config.tokenizer_max_length, padding="max_length", truncation=True)
+    X_val = tokenizer(X_val.tolist(), max_length=config.tokenizer_max_length, padding="max_length", truncation=True)
 
     Y_train = torch.tensor(Y_train).clone().detach()
     Y_val = torch.tensor(Y_val).clone().detach()
@@ -153,7 +159,7 @@ def get_train_val_data(tweets, labels):
 def get_test_data(tweets):
     nb_of_samples = len(tweets)
     print(f'{nb_of_samples} tweets loaded for testing.\n')
-    tweets = tokenizer(tweets, max_length=256, padding="max_length", truncation=True)
+    tweets = tokenizer(tweets, max_length=config.tokenizer_max_length, padding="max_length", truncation=True)
     tweets = TestDataset(tweets)
 
     return tweets
@@ -163,39 +169,46 @@ def compute_metrics(eval_pred):
     predictions = np.argmax(logits, axis=-1)
 
     return metric.compute(predictions=predictions, references=labels)
-    
-def train(model, train_dataset_param, val_dataset_param):
+
+
+def train(model, train_dataset, val_dataset):
+
     training_args = TrainingArguments(output_dir=checkpoints_path, 
                                     overwrite_output_dir=True,
-                                    per_device_train_batch_size=bs_train, 
-                                    per_device_eval_batch_size=bs_eval, 
-                                    learning_rate=lr, 
-                                    evaluation_strategy="steps",    # "steps"
+                                    per_device_train_batch_size=config.bs_train, 
+                                    per_device_eval_batch_size=config.bs_eval, 
+                                    learning_rate=config.lr, 
+                                    evaluation_strategy="steps",            # "steps"
                                     save_strategy="steps",
                                     gradient_accumulation_steps=4,
                                     # gradient_checkpointing=True,
                                     save_total_limit=2,
-                                    fp16=fp16,
-                                    seed=SEED,
-                                    # warmup_steps=500,              # number of warmup steps for learning rate scheduler
-                                    weight_decay=weight_decay,       # strength of weight decay
-                                    logging_dir='./logs',            # directory for storing logs
+                                    fp16=config.fp16,
+                                    seed=config.seed,
+                                    warmup_steps=300,                       # number of warmup steps for learning rate scheduler
+                                    weight_decay=config.weight_decay,       # strength of weight decay
+                                    logging_dir='./logs',                   # directory for storing logs
                                     logging_steps=500,
                                     load_best_model_at_end=True,
-                                    num_train_epochs=n_epochs)
-    
-    if not (train_dataset_param is None) and not (val_dataset_param is None):
-        train_dataset, val_dataset = train_dataset_param, val_dataset_param
+                                    num_train_epochs=config.n_epochs)
 
+
+    # data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=True)
+        
     trainer = Trainer(
       model=model,
       args=training_args,
       train_dataset=train_dataset,
       eval_dataset=val_dataset,
+    #   data_collator=data_collator,
+    #   tokenizer=tokenizer,
       compute_metrics=compute_metrics
     )
 
     trainer.train()
+
+    trainer.save_model(experiments_results_path + "/best_model")    # save the best model
+
 
 def load_model_from_checkpoint(selected_checkpoint):
     model_path = checkpoints_path+f"checkpoint-{selected_checkpoint}"
@@ -204,11 +217,7 @@ def load_model_from_checkpoint(selected_checkpoint):
     
     return model
 
-def load_model_from_path(model_path):
-    print(f"Loaded model from: {model_path}")
     
-    return AutoModelForSequenceClassification.from_pretrained(model_path, num_labels=config.num_labels, local_files_only=False, ignore_mismatched_sizes=True)
-
 def test(model):
     test_trainer = Trainer(model)
     tweets = get_test_data(load_test_data())
@@ -235,16 +244,32 @@ def generate_submission(Y_preds):
 def load_and_train(model, amount_per_batch, iteration):
     
     if model is None:
-        model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=config.num_labels, local_files_only=False, ignore_mismatched_sizes=True)
+        model = AutoModelForSequenceClassification.from_pretrained(config.model_name, num_labels=config.num_labels, local_files_only=False, ignore_mismatched_sizes=True)
 
-    # Load training & validation data
-    tweets, labels = load_train_data(amount_per_batch, iteration)
-    train_dataset, val_dataset = get_train_val_data(tweets, labels)
-    tweets, labels = [], []
 
-    # Free some memory
-    del(tweets)
-    del(labels)
+    if config.use_HF_dataset_format:
+        train_dataset = load_dataset("./HF_dataset.py", split="train")
+        val_dataset = load_dataset("./HF_dataset.py", split="validation")
+
+        datasets = load_dataset("./HF_dataset.py")
+
+        def tokenization(sample):
+            return tokenizer(sample["text"], max_length=config.tokenizer_max_length, padding="max_length", truncation=True)
+
+        datasets = datasets.map(tokenization, batched=True)
+
+        train_dataset = datasets["train"]
+        val_dataset = datasets["validation"]
+
+    else:
+        # Load training & validation data
+        tweets, labels = load_train_data(amount_per_batch, iteration)
+        train_dataset, val_dataset = get_train_val_data(tweets, labels)
+        tweets, labels = [], []
+
+        # Free some memory
+        del(tweets)
+        del(labels)
     
     # TRAINING
     train(model, train_dataset, val_dataset)
@@ -295,10 +320,17 @@ def run_training(model):
     send_discord_notif("Starting Training", f"Going to iterate over {number_of_iterations} subsets of {amount_per_it} samples/tweets (separated for training/validation) to see {total_amount_of_tweets} in total.", orange, None)
 
     try:
-        for iteration in range(number_of_iterations)[config.start_at_it:]:
+        total_subsets = range(number_of_iterations)[config.start_at_it:]
+
+        if config.use_HF_dataset_format:
+            total_subsets = range(1)
+
+        for iteration in total_subsets:
             trained_model = load_and_train(model, amount_per_it, iteration)
+            # torch.cuda.empty_cache()  # can be used if save the trained model before that line and load it again after that line
             send_discord_notif("Continuing Training", f"currently finished subset iteration: {iteration+1}/{number_of_iterations} ", orange, None)
             print(f"{iteration+1} out of {number_of_iterations} subset iteration(s) done!")
+    
     except Exception as e:
         print("GOT ERROR:", str(e))
         send_discord_notif("ERROR WHILE TRAINING", str(e), red, f"Got the error at subset iteration: {iteration+1}/{number_of_iterations}")
@@ -329,7 +361,7 @@ if __name__ == "__main__":
     torch.cuda.empty_cache()    
 
     # To time the duration of the experiment
-    time_run = time.perf_counter()     # better to use perf_counter() than time()
+    time_run = time.time()     # better to use perf_counter() than time()
 
     # Get the config
     config = Configuration.parse_cmd()
@@ -337,6 +369,7 @@ if __name__ == "__main__":
     # Prepare the folder where this experiment (i.e., program run) outputs and results will be saved
     experiment_id = int(time_run)
     experiment_date = time.ctime(experiment_id)
+    print("CURRENT DATE TIME: ", experiment_date)
     experiment_date_name = experiment_date.replace(" ", "_").replace(":", "h")[:-8] + experiment_date[-8:-5].replace(":", "m") + "s"
     experiment_date_for_folder_name = "experiment-" + experiment_date_name
 
@@ -367,7 +400,7 @@ if __name__ == "__main__":
 
     # Save in the experiment folder the command line that was used to run this program
     cmd = sys.argv[0] + ' ' + ' '.join(sys.argv[1:])
-    with open(os.path.join(experiments_results_path, 'cmd.txt'), 'w') as f:  # NOT DONE: need to create a model directory for each model
+    with open(os.path.join(experiments_results_path, 'cmd.txt'), 'w') as f:
         f.write(cmd)
 
     # Data
@@ -378,20 +411,22 @@ if __name__ == "__main__":
 
     # Calculate values for the number of tweets to work with during model training   
     amount_per_it = config.amount_per_it
+    full_dataset_size = 2500000
+    small_dataset_size = 200000
     
-    if config.amount_of_data > 200000:
+    if config.amount_of_data > small_dataset_size:
         use_full_dataset = True  
 
     if use_full_dataset:
-        total_amount_of_tweets = 2500000    # max number of tweets there are in the full dataset
+        total_amount_of_tweets = full_dataset_size    # max number of tweets there are in the full dataset
     else:
-        total_amount_of_tweets = 200000     # max number of tweets there are in the size-reduced dataset
+        total_amount_of_tweets = small_dataset_size     # max number of tweets there are in the size-reduced dataset
 
     # if we don't want to use the complete dataset (whether the full one or the size-reduced one)
     if config.amount_of_data != 0:
         total_amount_of_tweets = config.amount_of_data
-        if total_amount_of_tweets > 2500000:
-            total_amount_of_tweets = 2500000 
+        if total_amount_of_tweets > full_dataset_size:
+            total_amount_of_tweets = full_dataset_size 
     
     number_of_iterations = int(np.ceil(total_amount_of_tweets / amount_per_it))
     print(f"We will use {total_amount_of_tweets} tweets in total. {int(train_val_ratio * total_amount_of_tweets)} for training and {int(total_amount_of_tweets * (1-train_val_ratio))} for validation.")
@@ -406,17 +441,18 @@ if __name__ == "__main__":
     weight_decay = config.weight_decay
     tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True)
 
+    # If we need to load a model from a checkpoint or not
     if not (config.load_model is None):
         model = load_model_from_checkpoint(config.load_model)
 
     # Misc
     submit_to_kaggle = config.autosubmit
-    discord_enabled =  config.discord
+    discord_enabled = config.discord
 
     # Create the model
     model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=config.num_labels, local_files_only=False, ignore_mismatched_sizes=True)
     model.to(C.DEVICE)  # automatic if use the Trainer()
-    print("\nRunning on", C.DEVICE, " with ", torch.__version__, "\n")
+    print("\nRunning on", C.DEVICE, " with PyTorch", torch.__version__, "\n")
 
     # --- TRAINING & VALIDATION ---
     if config.train:
@@ -432,6 +468,6 @@ if __name__ == "__main__":
         send_discord_notif("Submitted results on Kaggle!", f"{res}", green, None)
 
     # Time that took the whole experiment to run
-    time_run = time.perf_counter() - time_run
+    time_run = time.time() - time_run
     print(f"The program took {str(time_run/60)[:6]} minutes to run.")
 

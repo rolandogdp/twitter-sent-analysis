@@ -9,3 +9,6 @@ datascience
 folium
 datasets
 requests
+tensorboardX
+tensorboard
+
