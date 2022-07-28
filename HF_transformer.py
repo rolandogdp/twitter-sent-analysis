@@ -39,6 +39,7 @@ green = 3066993
 orange = 15105570
 
 
+
 # Global variables
 METRIC = load_metric("accuracy")    # metric to use
 val_dataset_global = None
@@ -257,6 +258,7 @@ def train(model, train_dataset, val_dataset, iteration):
         trainer.train()
     else: 
         trainer.train(resume_from_checkpoint=True)
+
 
     best_model_at_iteration_path = f"/best_model/iteration{iteration}"
     trainer.save_model(experiments_results_path + best_model_at_iteration_path)    # save the best model of the current iteration
