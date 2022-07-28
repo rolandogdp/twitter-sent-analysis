@@ -115,10 +115,10 @@ def load_train_data():
     # To shuffle the data before cerating the .txt file dataset
     nb_of_samples = len(tweets)
     shuffled_indices = np.random.permutation(nb_of_samples)
-    train_indices = shuffled_indices[:nb_of_samples]
-    labels = labels[train_indices]
+    tweets = tweets[shuffled_indices]
+    labels = labels[shuffled_indices]
 
-    print("Number of indices for training: ", len(train_indices))
+    print("Number of indices for training: ", len(shuffled_indices))
 
     return tweets, labels
 

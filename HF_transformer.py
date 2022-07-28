@@ -39,7 +39,6 @@ green = 3066993
 orange = 15105570
 
 
-
 # Global variables
 METRIC = load_metric("accuracy")    # metric to use
 val_dataset_global = None
@@ -232,7 +231,7 @@ def train(model, train_dataset, val_dataset, iteration):
                                     save_total_limit=2,
                                     fp16=config.fp16,
                                     seed=config.seed,
-                                    warmup_steps=300,                       # number of warmup steps for learning rate scheduler
+                                    warmup_steps=500,                       # number of warmup steps for learning rate scheduler
                                     weight_decay=config.weight_decay,       # strength of weight decay
                                     logging_dir='./logs',                   # directory for storing logs
                                     logging_steps=500,
@@ -259,15 +258,14 @@ def train(model, train_dataset, val_dataset, iteration):
     else: 
         trainer.train(resume_from_checkpoint=True)
 
-
     best_model_at_iteration_path = f"/best_model/iteration{iteration}"
     trainer.save_model(experiments_results_path + best_model_at_iteration_path)    # save the best model of the current iteration
 
 
-def load_model_from_checkpoint(selected_checkpoint):
-    model_path = checkpoints_path+f"checkpoint-{selected_checkpoint}"
-    model = AutoModelForSequenceClassification.from_pretrained(model_path, num_labels=config.num_labels, local_files_only=False, ignore_mismatched_sizes=True)
-    print(f"Loaded model from: {model_path}")
+def load_model_from_checkpoint(path_to_checkpoint):
+    full_path_to_model_checkpoint = experiment_path + path_to_checkpoint
+    model = AutoModelForSequenceClassification.from_pretrained(full_path_to_model_checkpoint, num_labels=config.num_labels, local_files_only=False, ignore_mismatched_sizes=True)
+    print(f"Loaded model from: {full_path_to_model_checkpoint}")
     
     return model
 
@@ -372,8 +370,8 @@ def submit_preds_on_Kaggle(submit_filename, msg):
 def run_training(model):
     print(f"Going to iterate over {number_of_iterations} subsets of {amount_per_it} samples/tweets (separated for training/validation) to see {total_amount_of_tweets} in total.")
     send_discord_notif("Starting Training", f"Going to iterate over {number_of_iterations} subsets of {amount_per_it} samples/tweets (separated for training/validation) to see {total_amount_of_tweets} in total.", orange, None)
-    project_name = f"cil-{model_name}".replace("/","-").replace("\\","").replace("?","").replace("%","").replace(":","")
-    wandb.init(project=project_name)
+    wandb_project_name = f"cil-{model_name}".replace("/","-").replace("\\","").replace("?","").replace("%","").replace(":","")
+    wandb.init(project=wandb_project_name)
     try:
         total_subsets = range(number_of_iterations)[config.start_at_it:]
 
@@ -499,7 +497,7 @@ if __name__ == "__main__":
 
     # If we need to load a model from a checkpoint or not
     if not (config.load_model is None):
-        model = load_model_from_checkpoint(config.load_model)
+        model = load_model_from_checkpoint(config.load_model)   # load_model should be (from a previous exp) e.g.: experiment-Thu_Jul_28_03h29m56s/checkpoints/checkpoint-14500
 
     # Misc
     submit_to_kaggle = config.autosubmit
