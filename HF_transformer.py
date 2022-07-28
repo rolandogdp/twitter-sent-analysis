@@ -38,7 +38,7 @@ red = 15158332
 green = 3066993
 orange = 15105570
 
-val_dataset = None
+val_dataset_global = None
 
 # Global variables
 metric = load_metric("accuracy")    # metric to use
@@ -159,34 +159,57 @@ def vectorize_data(tweets, train_indices, val_indices):
     return X_train, X_val
 
 def get_train_val_data(tweets, labels):
-    nb_of_samples = len(tweets)
-    shuffled_indices = np.random.permutation(nb_of_samples)
-    split_idx = int(train_val_ratio * nb_of_samples)
+    global val_dataset_global
+    if val_dataset_global is None:
+        nb_of_samples = len(tweets)
+        shuffled_indices = np.random.permutation(nb_of_samples)
+        split_idx = int(train_val_ratio * nb_of_samples)
 
-    train_indices = shuffled_indices[:split_idx]
-    val_indices = shuffled_indices[split_idx:]
+        train_indices = shuffled_indices[:split_idx]
+        val_indices = shuffled_indices[split_idx:]
 
-    print("Number of indices for training: ", len(train_indices))
-    print("Number of indices for validation: ", len(val_indices))
+        print("Number of indices for training: ", len(train_indices))
+        print("Number of indices for validation: ", len(val_indices))
 
-    if use_most_freq_words:
-        X_train, X_val = vectorize_data(tweets, train_indices, val_indices)
+        if use_most_freq_words:
+            X_train, X_val = vectorize_data(tweets, train_indices, val_indices)
+        else:
+            X_train, X_val = tweets[train_indices], tweets[val_indices]
+        
+        Y_train = labels[train_indices]
+        Y_val = labels[val_indices]
+        
+        X_train = tokenizer(X_train.tolist(), max_length=config.tokenizer_max_length, padding="max_length", truncation=True)
+        X_val = tokenizer(X_val.tolist(), max_length=config.tokenizer_max_length, padding="max_length", truncation=True)
+
+        Y_train = torch.tensor(Y_train).clone().detach()
+        Y_val = torch.tensor(Y_val).clone().detach()
+
+        train_dataset = TrainDataset(X_train, Y_train)
+        val_dataset = TrainDataset(X_val, Y_val)
+        val_dataset_global = val_dataset
+        
+        return train_dataset, val_dataset
     else:
-        X_train, X_val = tweets[train_indices], tweets[val_indices]
-    
-    Y_train = labels[train_indices]
-    Y_val = labels[val_indices]
-    
-    X_train = tokenizer(X_train.tolist(), max_length=config.tokenizer_max_length, padding="max_length", truncation=True)
-    X_val = tokenizer(X_val.tolist(), max_length=config.tokenizer_max_length, padding="max_length", truncation=True)
+        nb_of_samples = len(tweets)
+        shuffled_indices = np.random.permutation(nb_of_samples)
+        
+        train_indices = shuffled_indices
+        print("Number of indices for training: ", len(train_indices))
 
-    Y_train = torch.tensor(Y_train).clone().detach()
-    Y_val = torch.tensor(Y_val).clone().detach()
+        if use_most_freq_words:
+            X_train = vectorize_data(tweets, train_indices, val_indices)
+        else:
+            X_train = tweets[train_indices]
+        
+        Y_train = labels[train_indices]
+        
+        X_train = tokenizer(X_train.tolist(), max_length=config.tokenizer_max_length, padding="max_length", truncation=True)
 
-    train_dataset = TrainDataset(X_train, Y_train)
-    val_dataset = TrainDataset(X_val, Y_val)
-    
-    return train_dataset, val_dataset
+        Y_train = torch.tensor(Y_train).clone().detach()
+        train_dataset = TrainDataset(X_train, Y_train)
+        
+        return train_dataset,val_dataset_global
 
 def get_test_data(tweets):
     nb_of_samples = len(tweets)
@@ -352,7 +375,7 @@ def submit_preds_on_Kaggle(submit_filename, msg):
 def run_training(model):
     print(f"Going to iterate over {number_of_iterations} subsets of {amount_per_it} samples/tweets (separated for training/validation) to see {total_amount_of_tweets} in total.")
     send_discord_notif("Starting Training", f"Going to iterate over {number_of_iterations} subsets of {amount_per_it} samples/tweets (separated for training/validation) to see {total_amount_of_tweets} in total.", orange, None)
-    project_name = f"cil-{model_name}"
+    project_name = f"cil-{model_name}".replace("/","-").replace("\\","").replace("?","").replace("%","").replace(":","")
     wandb.init(project=project_name)
     try:
         total_subsets = range(number_of_iterations)[config.start_at_it:]
