@@ -24,6 +24,7 @@ from datasets import load_dataset
 
 import time
 import requests
+import wandb
 
 
 # Config file
@@ -36,6 +37,8 @@ bot_name = C.bot_name
 red = 15158332
 green = 3066993
 orange = 15105570
+
+val_dataset = None
 
 # Global variables
 metric = load_metric("accuracy")    # metric to use
@@ -76,34 +79,63 @@ def read_file(file_name_label_tuple, starting_line=0, end_line=0):
 
     return(tweets, labels)
 
+# Read a file containing tweets and store them as well as their respective labels 
+def read_file_HF(file_name, starting_line=0, end_line=0):
+    tweets, labels = [], []
+    with open( file_name, 'r', encoding='utf-8') as f:
+        tweets = [line.split("\t",maxsplit=1) for line in f.readlines()[starting_line:end_line]]
+        tweets = np.array(tweets)
+        labels = tweets[:,0].astype(np.uint8)
+        tweets = tweets[:,1]
+        
+    return(tweets, labels)
+
 # Store the training data, tweets and labels, in numpy arrays
 def load_train_data(amount_per_batch, iteration):
  
-    if use_full_dataset == True:
-        X_train_neg_path = project_path + "train_neg_full.txt"
-        X_train_pos_path = project_path + "train_pos_full.txt"
+    # if use_full_dataset == True:
+    #     X_train_neg_path = project_path + "train_neg_full.txt"
+    #     X_train_pos_path = project_path + "train_pos_full.txt"
         
-    else:
-        X_train_neg_path = project_path + "train_neg.txt"
-        X_train_pos_path = project_path + "train_pos.txt"
+    # else:
+    #     X_train_neg_path = project_path + "train_neg.txt"
+    #     X_train_pos_path = project_path + "train_pos.txt"
 
-    amount_per_batch = amount_per_batch // 2
+    # amount_per_batch = amount_per_batch // 2
     
+    # starting_line = iteration * amount_per_batch
+    # end_line = starting_line + amount_per_batch
+    # print(f"Going to read {amount_per_batch*2} lines ({amount_per_batch} in each of the pos and neg datasets), starting_line:{starting_line}, end_line:{end_line}")
+    # tweets, labels = read_file((X_train_neg_path, 0), starting_line=starting_line, end_line=end_line)
+    # tweets_2, labels_2 = read_file((X_train_pos_path, 1), starting_line=starting_line, end_line=end_line)
+    # tweets += tweets_2
+    # tweets_2 = []
+    # del(tweets_2)
+    # labels += labels_2
+    # labels_2 = []
+    # del(labels_2)
+    # print(f"Loaded {len(tweets)} tweets!")
+    # return np.array(tweets), np.array(labels)
+
     starting_line = iteration * amount_per_batch
     end_line = starting_line + amount_per_batch
     print(f"Going to read {amount_per_batch*2} lines ({amount_per_batch} in each of the pos and neg datasets), starting_line:{starting_line}, end_line:{end_line}")
-    tweets, labels = read_file((X_train_neg_path, 0), starting_line=starting_line, end_line=end_line)
-    tweets_2, labels_2 = read_file((X_train_pos_path, 1), starting_line=starting_line, end_line=end_line)
-    tweets += tweets_2
-    tweets_2 = []
-    del(tweets_2)
-    labels += labels_2
-    labels_2 = []
-    del(labels_2)
-        
+    tweets, labels = read_file_HF(project_path + "HF_data.txt", starting_line, end_line)
     print(f"Loaded {len(tweets)} tweets!")
+    # print(tweets.shape)
+    # print(labels.shape)
+
+    # print(tweets[:3])
+    # print(labels[:3])
+
+    # print(type(tweets))
+    # print(type(labels))
+
+
+    return tweets, labels
+
+
     
-    return np.array(tweets), np.array(labels)
 
 # Store the testing data (tweets) in a numpy array
 def load_test_data():
@@ -190,7 +222,9 @@ def train(model, train_dataset, val_dataset):
                                     logging_dir='./logs',                   # directory for storing logs
                                     logging_steps=500,
                                     load_best_model_at_end=True,
-                                    num_train_epochs=config.n_epochs)
+                                    num_train_epochs=config.n_epochs,
+                                    report_to="wandb" # WANDB INTEGRATION
+                                    )
 
 
     # data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=True)
@@ -318,7 +352,8 @@ def submit_preds_on_Kaggle(submit_filename, msg):
 def run_training(model):
     print(f"Going to iterate over {number_of_iterations} subsets of {amount_per_it} samples/tweets (separated for training/validation) to see {total_amount_of_tweets} in total.")
     send_discord_notif("Starting Training", f"Going to iterate over {number_of_iterations} subsets of {amount_per_it} samples/tweets (separated for training/validation) to see {total_amount_of_tweets} in total.", orange, None)
-
+    project_name = f"cil-{model_name}"
+    wandb.init(project=project_name)
     try:
         total_subsets = range(number_of_iterations)[config.start_at_it:]
 
@@ -397,6 +432,7 @@ if __name__ == "__main__":
     np.random.seed(SEED)
     torch.manual_seed(SEED)
     torch.backends.cudnn.deterministic = False
+    torch.backends.cudnn.benchmark = True # DEBUG: comment this when debugging.
 
     # Save in the experiment folder the command line that was used to run this program
     cmd = sys.argv[0] + ' ' + ' '.join(sys.argv[1:])
