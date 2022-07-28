@@ -226,7 +226,7 @@ def compute_metrics(eval_pred):
     return metric.compute(predictions=predictions, references=labels)
 
 
-def train(model, train_dataset, val_dataset):
+def train(model, train_dataset, val_dataset, iteration):
 
     training_args = TrainingArguments(output_dir=checkpoints_path, 
                                     overwrite_output_dir=True,
@@ -261,8 +261,11 @@ def train(model, train_dataset, val_dataset):
     #   tokenizer=tokenizer,
       compute_metrics=compute_metrics
     )
-
-    trainer.train(resume_from_checkpoint=True)
+    dir = os.listdir(checkpoints_path)
+    
+    if len(dir)>0:
+        trainer.train(resume_from_checkpoint=True)
+    else:trainer.train()
 
     trainer.save_model(experiments_results_path + "/best_model")    # save the best model
 
@@ -329,7 +332,7 @@ def load_and_train(model, amount_per_batch, iteration):
         del(labels)
     
     # TRAINING
-    train(model, train_dataset, val_dataset)
+    train(model, train_dataset, val_dataset, iteration)
 
     return model
 
