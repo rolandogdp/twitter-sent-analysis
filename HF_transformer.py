@@ -262,7 +262,7 @@ def train(model, train_dataset, val_dataset):
       compute_metrics=compute_metrics
     )
 
-    trainer.train()
+    trainer.train(resume_from_checkpoint=True)
 
     trainer.save_model(experiments_results_path + "/best_model")    # save the best model
 
