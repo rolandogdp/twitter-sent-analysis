@@ -38,11 +38,11 @@ red = 15158332
 green = 3066993
 orange = 15105570
 
-val_dataset_global = None
+
 
 # Global variables
-metric = load_metric("accuracy")    # metric to use
-
+METRIC = load_metric("accuracy")    # metric to use
+val_dataset_global = None
 
 # DATASET CLASSES
 class TrainDataset(Dataset):
@@ -122,14 +122,6 @@ def load_train_data(amount_per_batch, iteration):
     print(f"Going to read {amount_per_batch*2} lines ({amount_per_batch} in each of the pos and neg datasets), starting_line:{starting_line}, end_line:{end_line}")
     tweets, labels = read_file_HF(project_path + "HF_data.txt", starting_line, end_line)
     print(f"Loaded {len(tweets)} tweets!")
-    # print(tweets.shape)
-    # print(labels.shape)
-
-    # print(tweets[:3])
-    # print(labels[:3])
-
-    # print(type(tweets))
-    # print(type(labels))
 
 
     return tweets, labels
@@ -223,7 +215,7 @@ def compute_metrics(eval_pred):
     logits, labels = eval_pred      # here, we have to get rid of the second element (neutral class) of the logits before taking the softmax IF we want to only predict neg/pos
     predictions = np.argmax(logits, axis=-1)
 
-    return metric.compute(predictions=predictions, references=labels)
+    return METRIC.compute(predictions=predictions, references=labels)
 
 
 def train(model, train_dataset, val_dataset, iteration):
@@ -261,13 +253,15 @@ def train(model, train_dataset, val_dataset, iteration):
     #   tokenizer=tokenizer,
       compute_metrics=compute_metrics
     )
-    dir = os.listdir(checkpoints_path)
-    
-    if len(dir)>0:
-        trainer.train(resume_from_checkpoint=True)
-    else:trainer.train()
 
-    trainer.save_model(experiments_results_path + "/best_model")    # save the best model
+    if len(os.listdir(checkpoints_path)) == 0:
+        trainer.train()
+    else: 
+        trainer.train(resume_from_checkpoint=True)
+
+
+    best_model_at_iteration_path = f"/best_model/iteration{iteration}"
+    trainer.save_model(experiments_results_path + best_model_at_iteration_path)    # save the best model of the current iteration
 
 
 def load_model_from_checkpoint(selected_checkpoint):
@@ -336,7 +330,7 @@ def load_and_train(model, amount_per_batch, iteration):
 
     return model
 
-# DISCORD
+# DISCORD 
 def send_discord_notif(title, content, color, error=None):
     if not discord_enabled:
         return
@@ -532,4 +526,3 @@ if __name__ == "__main__":
     # Time that took the whole experiment to run
     time_run = time.time() - time_run
     print(f"The program took {str(time_run/60)[:6]} minutes to run.")
-
