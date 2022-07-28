@@ -12,7 +12,7 @@ class Constants(object):
             # Environment setup
             self.DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
             self.discord_hook = "https://discord.com/api/webhooks/990270535592181800/g_zbw08Fz-52WZAbeb1Sy5au_ND2h1TmSmn1Cs_BIrHj7ne3Mb8rcnbl3EcrOY-hd_sn"
-            self.bot_name = "Klim's bot"
+            self.bot_name = "CIL Project's bot"
             
     instance = None
 
