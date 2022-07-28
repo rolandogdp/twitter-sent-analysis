@@ -170,8 +170,8 @@ def get_train_val_data(tweets, labels):
         Y_train = labels[train_indices]
         Y_val = labels[val_indices]
         
-        X_train = tokenizer(X_train.tolist(), max_length=config.tokenizer_max_length, padding="max_length", truncation=True)
-        X_val = tokenizer(X_val.tolist(), max_length=config.tokenizer_max_length, padding="max_length", truncation=True)
+        X_train = tokenizer(X_train.tolist()) # , max_length=config.tokenizer_max_length, padding="max_length", truncation=True
+        X_val = tokenizer(X_val.tolist())
 
         Y_train = torch.tensor(Y_train).clone().detach()
         Y_val = torch.tensor(Y_val).clone().detach()
@@ -195,7 +195,7 @@ def get_train_val_data(tweets, labels):
         
         Y_train = labels[train_indices]
         
-        X_train = tokenizer(X_train.tolist(), max_length=config.tokenizer_max_length, padding="max_length", truncation=True)
+        X_train = tokenizer(X_train.tolist())# , max_length=config.tokenizer_max_length, padding="max_length", truncation=True
 
         Y_train = torch.tensor(Y_train).clone().detach()
         train_dataset = TrainDataset(X_train, Y_train)
@@ -205,7 +205,7 @@ def get_train_val_data(tweets, labels):
 def get_test_data(tweets):
     nb_of_samples = len(tweets)
     print(f'{nb_of_samples} tweets loaded for testing.\n')
-    tweets = tokenizer(tweets, max_length=config.tokenizer_max_length, padding="max_length", truncation=True)
+    tweets = tokenizer(tweets)#, max_length=config.tokenizer_max_length, padding="max_length", truncation=True)
     tweets = TestDataset(tweets)
 
     return tweets
@@ -306,7 +306,7 @@ def load_and_train(model, amount_per_batch, iteration):
         datasets = load_dataset("./HF_dataset.py")
 
         def tokenization(sample):
-            return tokenizer(sample["text"], max_length=config.tokenizer_max_length, padding="max_length", truncation=True)
+            return tokenizer(sample["text"])#, max_length=config.tokenizer_max_length, padding="max_length", truncation=True)
 
         datasets = datasets.map(tokenization, batched=True)
 
@@ -361,7 +361,7 @@ def submit_preds_on_Kaggle(submit_filename, msg):
     import kaggle
     api = kaggle.api
     api.get_config_value("username")
-    res = api.competition_submit(submit_filename, f"Automatic File submission test: {msg}", "cil-text-classification-2022")
+    res = api.competition_submit( experiments_results_path + "/test_results/" + submit_filename, f"Automatic File submission test: {msg}", "cil-text-classification-2022")
     print("res: ", res)
     
     return res
@@ -495,9 +495,6 @@ if __name__ == "__main__":
     weight_decay = config.weight_decay
     tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True)
 
-    # If we need to load a model from a checkpoint or not
-    if not (config.load_model is None):
-        model = load_model_from_checkpoint(config.load_model)   # load_model should be (from a previous exp) e.g.: experiment-Thu_Jul_28_03h29m56s/checkpoints/checkpoint-14500
 
     # Misc
     submit_to_kaggle = config.autosubmit
@@ -505,6 +502,11 @@ if __name__ == "__main__":
 
     # Create the model
     model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=config.num_labels, local_files_only=False, ignore_mismatched_sizes=True)
+    
+        # If we need to load a model from a checkpoint or not
+    if not (config.load_model is None):
+        model = load_model_from_checkpoint(config.load_model)   # load_model should be (from a previous exp) e.g.: experiment-Thu_Jul_28_03h29m56s/checkpoints/checkpoint-14500
+
     model.to(C.DEVICE)  # automatic if use the Trainer()
     print("\nRunning on", C.DEVICE, " with PyTorch", torch.__version__, "\n")
 
@@ -523,4 +525,4 @@ if __name__ == "__main__":
 
     # Time that took the whole experiment to run
     time_run = time.time() - time_run
-    print(f"The program took {str(time_run/60)[:6]} minutes to run.")
+    print(f"The program took {str(time_run/60/60)[:6]} Hours or {str(time_run/60)[:6]} minutes to run.")
