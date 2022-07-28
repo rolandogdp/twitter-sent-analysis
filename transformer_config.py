@@ -78,10 +78,10 @@ class Configuration(object):
         parser.add_argument('--model_name', type=str, default="bert-base-cased", help='Default model name to load')     # "cardiffnlp/twitter-roberta-base-sentiment-latest"
         
         # Learning args
-        parser.add_argument('--train_val_ratio', type=float, default=0.95, help='The training/validation ratio to use for the given dataset')
+        parser.add_argument('--train_val_ratio', type=float, default=0.99, help='The training/validation ratio to use for the given dataset')
         parser.add_argument('--lr', type=float, default=1e-4, help='Learning rate')
         parser.add_argument('--n_epochs', type=int, default=2, help='Number of train epochs')
-        parser.add_argument('--weight_decay', type=float, default=0.01, help='Weight decay')
+        parser.add_argument('--weight_decay', type=float, default=0.005, help='Weight decay')
         parser.add_argument('--bs_train', type=int, default=16, help='Batch size for the training set')
         parser.add_argument('--bs_eval', type=int, default=16, help='Batch size for validation/test set')
         parser.add_argument("--fp16", default=False, action="store_true", help='Uses fp16 for training (Not always supported)')
