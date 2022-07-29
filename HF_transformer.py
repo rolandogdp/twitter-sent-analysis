@@ -170,7 +170,7 @@ def get_train_val_data(tweets, labels):
         Y_train = labels[train_indices]
         Y_val = labels[val_indices]
         
-        X_train = tokenizer(X_val.tolist(), max_length=config.tokenizer_max_length, padding="max_length", truncation=True)
+        X_train = tokenizer(X_train.tolist(), max_length=config.tokenizer_max_length, padding="max_length", truncation=True)
         X_val = tokenizer(X_val.tolist(), max_length=config.tokenizer_max_length, padding="max_length", truncation=True)
 
         Y_train = torch.tensor(Y_train).clone().detach()
@@ -195,7 +195,7 @@ def get_train_val_data(tweets, labels):
         
         Y_train = labels[train_indices]
         
-        X_train = tokenizer(X_val.tolist(), max_length=config.tokenizer_max_length, padding="max_length", truncation=True)
+        X_train = tokenizer(X_train.tolist(), max_length=config.tokenizer_max_length, padding="max_length", truncation=True)
 
         Y_train = torch.tensor(Y_train).clone().detach()
         train_dataset = TrainDataset(X_train, Y_train)
@@ -205,7 +205,7 @@ def get_train_val_data(tweets, labels):
 def get_test_data(tweets):
     nb_of_samples = len(tweets)
     print(f'{nb_of_samples} tweets loaded for testing.\n')
-    tweets = tokenizer(X_val.tolist(), max_length=config.tokenizer_max_length, padding="max_length", truncation=True)
+    tweets = tokenizer(tweets, max_length=config.tokenizer_max_length, padding="max_length", truncation=True)
     tweets = TestDataset(tweets)
 
     return tweets
@@ -306,7 +306,7 @@ def load_and_train(model, amount_per_batch, iteration):
         datasets = load_dataset("./HF_dataset.py")
 
         def tokenization(sample):
-            return tokenizer(X_val.tolist(), max_length=config.tokenizer_max_length, padding="max_length", truncation=True)
+            return tokenizer(sample["text"], max_length=config.tokenizer_max_length, padding="max_length", truncation=True)
 
         datasets = datasets.map(tokenization, batched=True)
 
