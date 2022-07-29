@@ -222,7 +222,7 @@ def train(model, train_dataset_param, val_dataset_param):
                                     metric_for_best_model = "eval_loss",
                                     greater_is_better = False,
                                     #wandb
-                                    report_to='wandb'
+                                    #report_to='wandb'
                                     )
     
     if not (train_dataset_param is None) and not (val_dataset_param is None):
@@ -370,8 +370,8 @@ def run_testing(model):
 
 if __name__ == "__main__":
     torch.backends.cudnn.benchmark = True
-    wandb.init(project="twitter-sentiment-analysis-scal")
-    #os.environ["WANDB_DISABLED"] = "true"
+    #wandb.init(project="twitter-sentiment-analysis-scal")
+    os.environ["WANDB_DISABLED"] = "true"
     torch.cuda.empty_cache()    
     torch.autograd.set_detect_anomaly(True)
     # To time the duration of the experiment
