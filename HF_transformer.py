@@ -306,7 +306,7 @@ def load_and_train(model, amount_per_batch, iteration):
         datasets = load_dataset("./HF_dataset.py")
 
         def tokenization(sample):
-            return tokenizer(sample.tolist(), max_length=config.tokenizer_max_length, padding="max_length", truncation=True)
+            return tokenizer(sample["text"], max_length=config.tokenizer_max_length, padding="max_length", truncation=True)
 
         datasets = datasets.map(tokenization, batched=True)
 
