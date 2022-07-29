@@ -214,7 +214,8 @@ def train(model, train_dataset_param, val_dataset_param):
                                     # warmup_steps=500,              # number of warmup steps for learning rate scheduler
                                     weight_decay=weight_decay,       # strength of weight decay
                                     logging_dir='./logs',            # directory for storing logs
-                                    logging_steps=config.eval_every,
+                                    eval_steps = confid.eval_every,          
+                                    logging_steps=config.eval_every*5,
                                     load_best_model_at_end=True,
                                     save_steps=config.eval_every*10,
                                     num_train_epochs=n_epochs,
@@ -368,6 +369,7 @@ def run_testing(model):
     return submit_filename
 
 if __name__ == "__main__":
+    torch.backends.cudnn.benchmark = True
     wandb.init(project="twitter-sentiment-analysis-scal")
     #os.environ["WANDB_DISABLED"] = "true"
     torch.cuda.empty_cache()    

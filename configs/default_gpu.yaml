@@ -1,7 +1,7 @@
 #General
 tag: 'GPU'
 data_workers: 16
-eval_every: 1000
+eval_every: 5000
 on_cluster: True
 #Run
 test: True
@@ -21,6 +21,6 @@ weight_decay: 0.
 bs_train: 16
 bs_eval: 16
 fp16: False
-epsilon: 0.05
+epsilon: 0.01
 alpha: 0.1
 beta: 1.0

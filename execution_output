@@ -1,13 +1,13 @@
-Sender: LSF System <lsfadmin@eu-g3-008>
-Subject: Job 226632711: <python SCAL_transformer.py --cfg configs/default_gpu.yaml> in cluster <euler> Exited
+Sender: LSF System <lsfadmin@eu-lo-s4-009>
+Subject: Job 226770750: <python SCAL_transformer.py --cfg configs/default_gpu.yaml> in cluster <euler> Exited
 
-Job <python SCAL_transformer.py --cfg configs/default_gpu.yaml> was submitted from host <eu-login-30> by user <mezhang> in cluster <euler> at Tue Jul 26 22:29:53 2022
-Job was executed on host(s) <4*eu-g3-008>, in queue <gpu.120h>, as user <mezhang> in cluster <euler> at Tue Jul 26 22:30:24 2022
+Job <python SCAL_transformer.py --cfg configs/default_gpu.yaml> was submitted from host <eu-login-20> by user <mezhang> in cluster <euler> at Thu Jul 28 09:13:32 2022
+Job was executed on host(s) <4*eu-lo-s4-009>, in queue <gpu.120h>, as user <mezhang> in cluster <euler> at Thu Jul 28 09:14:00 2022
 </cluster/home/mezhang> was used as the home directory.
 </cluster/home/mezhang/twitter-sent-analysis> was used as the working directory.
-Started at Tue Jul 26 22:30:24 2022
-Terminated at Tue Jul 26 22:32:44 2022
-Results reported at Tue Jul 26 22:32:44 2022
+Started at Thu Jul 28 09:14:00 2022
+Terminated at Thu Jul 28 09:17:45 2022
+Results reported at Thu Jul 28 09:17:45 2022
 
 Your job looked like:
 
@@ -21,48 +21,38 @@ Exited with exit code 143.
 
 Resource usage summary:
 
-    CPU time :                                   176.00 sec.
-    Max Memory :                                 28034 MB
-    Average Memory :                             18165.86 MB
+    CPU time :                                   294.73 sec.
+    Max Memory :                                 25311 MB
+    Average Memory :                             9905.50 MB
     Total Requested Memory :                     32768.00 MB
-    Delta Memory :                               4734.00 MB
+    Delta Memory :                               7457.00 MB
     Max Swap :                                   -
-    Max Processes :                              5
-    Max Threads :                                37
-    Run time :                                   140 sec.
-    Turnaround time :                            171 sec.
+    Max Processes :                              7
+    Max Threads :                                39
+    Run time :                                   225 sec.
+    Turnaround time :                            253 sec.
 
 The output (if any) follows:
 
 wandb: Currently logged in as: mezhang. Use `wandb login --relogin` to force relogin
 wandb: Tracking run with wandb version 0.12.21
-wandb: Run data is saved locally in /cluster/home/mezhang/twitter-sent-analysis/wandb/run-20220726_223038-3f355mfk
+wandb: Run data is saved locally in /cluster/home/mezhang/twitter-sent-analysis/wandb/run-20220728_091529-2ahc5m6m
 wandb: Run `wandb offline` to turn off syncing.
-wandb: Syncing run astral-blaze-28
+wandb: Syncing run celestial-elevator-32
 wandb: ⭐️ View project at https://wandb.ai/mezhang/twitter-sentiment-analysis-scal
-wandb: 🚀 View run at https://wandb.ai/mezhang/twitter-sentiment-analysis-scal/runs/3f355mfk
+wandb: 🚀 View run at https://wandb.ai/mezhang/twitter-sentiment-analysis-scal/runs/2ahc5m6m
 Special tokens have been added in the vocabulary, make sure the associated word embeddings are fine-tuned or trained.
 /cluster/home/mezhang/miniconda3/envs/cil_env/lib/python3.7/site-packages/transformers/convert_slow_tokenizer.py:435: UserWarning: The sentencepiece tokenizer that you are converting to a fast tokenizer uses the byte fallback option which is not implemented in the fast tokenizers. In practice this means that the fast version of the tokenizer can produce unknown tokens whereas the sentencepiece version would have converted these unknown tokens into a sequence of byte tokens matching the original piece of text.
   "The sentencepiece tokenizer that you are converting to a fast tokenizer uses the byte fallback option"
 Special tokens have been added in the vocabulary, make sure the associated word embeddings are fine-tuned or trained.
-Some weights of the model checkpoint at microsoft/deberta-v3-base were not used when initializing DebertaV2Model: ['mask_predictions.classifier.weight', 'mask_predictions.classifier.bias', 'mask_predictions.dense.bias', 'mask_predictions.dense.weight', 'lm_predictions.lm_head.LayerNorm.bias', 'mask_predictions.LayerNorm.bias', 'mask_predictions.LayerNorm.weight', 'lm_predictions.lm_head.dense.bias', 'lm_predictions.lm_head.bias', 'lm_predictions.lm_head.dense.weight', 'lm_predictions.lm_head.LayerNorm.weight']
+Some weights of the model checkpoint at microsoft/deberta-v3-base were not used when initializing DebertaV2Model: ['lm_predictions.lm_head.bias', 'lm_predictions.lm_head.dense.weight', 'lm_predictions.lm_head.dense.bias', 'lm_predictions.lm_head.LayerNorm.bias', 'mask_predictions.dense.bias', 'mask_predictions.dense.weight', 'mask_predictions.LayerNorm.weight', 'mask_predictions.LayerNorm.bias', 'lm_predictions.lm_head.LayerNorm.weight', 'mask_predictions.classifier.bias', 'mask_predictions.classifier.weight']
 - This IS expected if you are initializing DebertaV2Model from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
 - This IS NOT expected if you are initializing DebertaV2Model from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
-/cluster/home/mezhang/miniconda3/envs/cil_env/lib/python3.7/site-packages/transformers/optimization.py:310: FutureWarning: This implementation of AdamW is deprecated and will be removed in a future version. Use the PyTorch implementation torch.optim.AdamW instead, or set `no_deprecation_warning=True` to disable this warning
-  FutureWarning,
-***** Running training *****
-  Num examples = 1187500
-  Num Epochs = 2
-  Instantaneous batch size per device = 16
-  Total train batch size (w. parallel, distributed & accumulation) = 32
-  Gradient Accumulation steps = 2
-  Total optimization steps = 74218
-Automatic Weights & Biases logging enabled, to disable set os.environ["WANDB_DISABLED"] = "true"
-  0% 0/74218 [00:00<?, ?it/s]
+
 Running on the cluster.
 The project path is:  /cluster/home/mezhang/twitter-sent-analysis/
 The experiment path is:  /cluster/scratch/mezhang/Experiments/
-The model checkpoints will be saved at:  /cluster/scratch/mezhang/Experiments/experiment-Fri_Feb__6_16h20m11s/checkpoints/ 
+The model checkpoints will be saved at:  /cluster/scratch/mezhang/Experiments/experiment-Wed_Feb_25_23h33m05s/checkpoints/ 
 
 We will use 2500000 tweets in total. 2375000 for training and 125000 for validation.
 1250000 tweets will be used for each of the 2 subset iterations (i.e., in each subset that is split in training/validation).
@@ -74,151 +64,28 @@ Going to read 1250000 lines (625000 in each of the pos and neg datasets), starti
 Loaded 1250000 tweets!
 Number of indices for training:  1187500
 Number of indices for validation:  62500
-  0% 1/74218 [00:03<62:50:08,  3.05s/it]  0% 2/74218 [00:04<47:39:52,  2.31s/it]  0% 3/74218 [00:06<42:43:53,  2.07s/it]  0% 4/74218 [00:08<40:26:44,  1.96s/it]  0% 5/74218 [00:10<39:06:09,  1.90s/it]  0% 6/74218 [00:12<38:23:51,  1.86s/it]  0% 7/74218 [00:13<37:52:10,  1.84s/it]  0% 8/74218 [00:15<37:32:33,  1.82s/it]  0% 9/74218 [00:17<37:17:21,  1.81s/it]  0% 10/74218 [00:19<37:12:01,  1.80s/it]  0% 11/74218 [00:20<37:11:34,  1.80s/it]Traceback (most recent call last):
+Traceback (most recent call last):
   File "SCAL_transformer.py", line 472, in <module>
     model = run_training(model)
   File "SCAL_transformer.py", line 340, in run_training
     trained_model = load_and_train(model, amount_per_it, iteration)
-  File "SCAL_transformer.py", line 291, in load_and_train
-    train(model, train_dataset, val_dataset)
-  File "SCAL_transformer.py", line 237, in train
-    trainer.train()
-  File "/cluster/home/mezhang/miniconda3/envs/cil_env/lib/python3.7/site-packages/transformers/trainer.py", line 1413, in train
-    ignore_keys_for_eval=ignore_keys_for_eval,
-  File "/cluster/home/mezhang/miniconda3/envs/cil_env/lib/python3.7/site-packages/transformers/trainer.py", line 1651, in _inner_training_loop
-    tr_loss_step = self.training_step(model, inputs)
-  File "/cluster/home/mezhang/miniconda3/envs/cil_env/lib/python3.7/site-packages/transformers/trainer.py", line 2345, in training_step
-    loss = self.compute_loss(model, inputs)
-  File "/cluster/home/mezhang/twitter-sent-analysis/trainers/myScalTrainer.py", line 12, in compute_loss
-    outputs = model(**inputs, return_dict = True)
-  File "/cluster/home/mezhang/miniconda3/envs/cil_env/lib/python3.7/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
-    return forward_call(*input, **kwargs)
-  File "/cluster/home/mezhang/twitter-sent-analysis/models/myScalModel.py", line 175, in forward
-    return_dict=return_dict,
-  File "/cluster/home/mezhang/miniconda3/envs/cil_env/lib/python3.7/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
-    return forward_call(*input, **kwargs)
-  File "/cluster/home/mezhang/miniconda3/envs/cil_env/lib/python3.7/site-packages/transformers/models/deberta_v2/modeling_deberta_v2.py", line 505, in forward
-    output_attentions=output_attentions,
-  File "/cluster/home/mezhang/miniconda3/envs/cil_env/lib/python3.7/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
-    return forward_call(*input, **kwargs)
-  File "/cluster/home/mezhang/miniconda3/envs/cil_env/lib/python3.7/site-packages/transformers/models/deberta_v2/modeling_deberta_v2.py", line 349, in forward
-    rel_embeddings=rel_embeddings,
-  File "/cluster/home/mezhang/miniconda3/envs/cil_env/lib/python3.7/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
-    return forward_call(*input, **kwargs)
-  File "/cluster/home/mezhang/miniconda3/envs/cil_env/lib/python3.7/site-packages/transformers/models/deberta_v2/modeling_deberta_v2.py", line 280, in forward
-    rel_embeddings=rel_embeddings,
-  File "/cluster/home/mezhang/miniconda3/envs/cil_env/lib/python3.7/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
-    return forward_call(*input, **kwargs)
-  File "/cluster/home/mezhang/miniconda3/envs/cil_env/lib/python3.7/site-packages/transformers/models/deberta_v2/modeling_deberta_v2.py", line 700, in forward
-    query_layer, key_layer, relative_pos, rel_embeddings, scale_factor
-  File "/cluster/home/mezhang/miniconda3/envs/cil_env/lib/python3.7/site-packages/transformers/models/deberta_v2/modeling_deberta_v2.py", line 794, in disentangled_attention_bias
-    p2c_pos = torch.clamp(-r_pos + att_span, 0, att_span * 2 - 1)
+  File "SCAL_transformer.py", line 283, in load_and_train
+    train_dataset, val_dataset = get_train_val_data(tweets, labels)
+  File "SCAL_transformer.py", line 171, in get_train_val_data
+    X_train = tokenizer(X_train_list, max_length=128, padding="max_length", truncation=True)
+  File "/cluster/home/mezhang/miniconda3/envs/cil_env/lib/python3.7/site-packages/transformers/tokenization_utils_base.py", line 2512, in __call__
+    **kwargs,
+  File "/cluster/home/mezhang/miniconda3/envs/cil_env/lib/python3.7/site-packages/transformers/tokenization_utils_base.py", line 2703, in batch_encode_plus
+    **kwargs,
+  File "/cluster/home/mezhang/miniconda3/envs/cil_env/lib/python3.7/site-packages/transformers/tokenization_utils_fast.py", line 449, in _batch_encode_plus
+    for encoding in encodings
+  File "/cluster/home/mezhang/miniconda3/envs/cil_env/lib/python3.7/site-packages/transformers/tokenization_utils_fast.py", line 449, in <listcomp>
+    for encoding in encodings
+  File "/cluster/home/mezhang/miniconda3/envs/cil_env/lib/python3.7/site-packages/transformers/tokenization_utils_fast.py", line 219, in _convert_encoding
+    encoding_dict["input_ids"].append(e.ids)
 KeyboardInterrupt
 wandb: Waiting for W&B process to finish... (failed 255). Press Control-C to abort syncing.
-wandb: - 0.001 MB of 0.001 MB uploaded (0.000 MB deduped)wandb: \ 0.001 MB of 0.001 MB uploaded (0.000 MB deduped)wandb: | 0.001 MB of 0.001 MB uploaded (0.000 MB deduped)wandb: / 0.001 MB of 0.018 MB uploaded (0.000 MB deduped)wandb: - 0.001 MB of 0.018 MB uploaded (0.000 MB deduped)wandb: \ 0.001 MB of 0.018 MB uploaded (0.000 MB deduped)wandb: | 0.018 MB of 0.018 MB uploaded (0.000 MB deduped)wandb: / 0.018 MB of 0.018 MB uploaded (0.000 MB deduped)wandb: - 0.018 MB of 0.018 MB uploaded (0.000 MB deduped)wandb: \ 0.018 MB of 0.018 MB uploaded (0.000 MB deduped)wandb: | 0.018 MB of 0.018 MB uploaded (0.000 MB deduped)wandb: / 0.018 MB of 0.018 MB uploaded (0.000 MB deduped)wandb: - 0.018 MB of 0.018 MB uploaded (0.000 MB deduped)wandb: \ 0.018 MB of 0.018 MB uploaded (0.000 MB deduped)wandb:                                                                                
-wandb: Synced astral-blaze-28: https://wandb.ai/mezhang/twitter-sentiment-analysis-scal/runs/3f355mfk
-wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
-wandb: Find logs at: ./wandb/run-20220726_223038-3f355mfk/logs
-Terminated
-Sender: LSF System <lsfadmin@eu-g2-07>
-Subject: Job 226633662: <python SCAL_transformer.py --cfg configs/default_gpu.yaml> in cluster <euler> Exited
-
-Job <python SCAL_transformer.py --cfg configs/default_gpu.yaml> was submitted from host <eu-login-30> by user <mezhang> in cluster <euler> at Tue Jul 26 22:32:54 2022
-Job was executed on host(s) <4*eu-g2-07>, in queue <gpu.120h>, as user <mezhang> in cluster <euler> at Tue Jul 26 22:33:25 2022
-</cluster/home/mezhang> was used as the home directory.
-</cluster/home/mezhang/twitter-sent-analysis> was used as the working directory.
-Started at Tue Jul 26 22:33:25 2022
-Terminated at Tue Jul 26 22:45:32 2022
-Results reported at Tue Jul 26 22:45:32 2022
-
-Your job looked like:
-
-------------------------------------------------------------
-# LSBATCH: User input
-python SCAL_transformer.py --cfg configs/default_gpu.yaml
-------------------------------------------------------------
-
-TERM_OWNER: job killed by owner.
-Exited with exit code 143.
-
-Resource usage summary:
-
-    CPU time :                                   864.72 sec.
-    Max Memory :                                 28042 MB
-    Average Memory :                             22796.77 MB
-    Total Requested Memory :                     32768.00 MB
-    Delta Memory :                               4726.00 MB
-    Max Swap :                                   -
-    Max Processes :                              5
-    Max Threads :                                41
-    Run time :                                   727 sec.
-    Turnaround time :                            758 sec.
-
-The output (if any) follows:
-
-wandb: Currently logged in as: mezhang. Use `wandb login --relogin` to force relogin
-wandb: Tracking run with wandb version 0.12.21
-wandb: Run data is saved locally in /cluster/home/mezhang/twitter-sent-analysis/wandb/run-20220726_223340-2623wl23
-wandb: Run `wandb offline` to turn off syncing.
-wandb: Syncing run summer-lake-29
-wandb: ⭐️ View project at https://wandb.ai/mezhang/twitter-sentiment-analysis-scal
-wandb: 🚀 View run at https://wandb.ai/mezhang/twitter-sentiment-analysis-scal/runs/2623wl23
-Special tokens have been added in the vocabulary, make sure the associated word embeddings are fine-tuned or trained.
-/cluster/home/mezhang/miniconda3/envs/cil_env/lib/python3.7/site-packages/transformers/convert_slow_tokenizer.py:435: UserWarning: The sentencepiece tokenizer that you are converting to a fast tokenizer uses the byte fallback option which is not implemented in the fast tokenizers. In practice this means that the fast version of the tokenizer can produce unknown tokens whereas the sentencepiece version would have converted these unknown tokens into a sequence of byte tokens matching the original piece of text.
-  "The sentencepiece tokenizer that you are converting to a fast tokenizer uses the byte fallback option"
-Special tokens have been added in the vocabulary, make sure the associated word embeddings are fine-tuned or trained.
-Some weights of the model checkpoint at microsoft/deberta-v3-base were not used when initializing DebertaV2Model: ['mask_predictions.classifier.weight', 'mask_predictions.LayerNorm.bias', 'lm_predictions.lm_head.bias', 'mask_predictions.classifier.bias', 'lm_predictions.lm_head.LayerNorm.weight', 'lm_predictions.lm_head.LayerNorm.bias', 'mask_predictions.dense.weight', 'lm_predictions.lm_head.dense.weight', 'lm_predictions.lm_head.dense.bias', 'mask_predictions.dense.bias', 'mask_predictions.LayerNorm.weight']
-- This IS expected if you are initializing DebertaV2Model from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
-- This IS NOT expected if you are initializing DebertaV2Model from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
-/cluster/home/mezhang/miniconda3/envs/cil_env/lib/python3.7/site-packages/transformers/optimization.py:310: FutureWarning: This implementation of AdamW is deprecated and will be removed in a future version. Use the PyTorch implementation torch.optim.AdamW instead, or set `no_deprecation_warning=True` to disable this warning
-  FutureWarning,
-***** Running training *****
-  Num examples = 1187500
-  Num Epochs = 2
-  Instantaneous batch size per device = 16
-  Total train batch size (w. parallel, distributed & accumulation) = 16
-  Gradient Accumulation steps = 1
-  Total optimization steps = 148438
-Automatic Weights & Biases logging enabled, to disable set os.environ["WANDB_DISABLED"] = "true"
-  0% 0/148438 [00:00<?, ?it/s]
-Running on the cluster.
-The project path is:  /cluster/home/mezhang/twitter-sent-analysis/
-The experiment path is:  /cluster/scratch/mezhang/Experiments/
-The model checkpoints will be saved at:  /cluster/scratch/mezhang/Experiments/experiment-Fri_Jan_30_13h27m12s/checkpoints/ 
-
-We will use 2500000 tweets in total. 2375000 for training and 125000 for validation.
-1250000 tweets will be used for each of the 2 subset iterations (i.e., in each subset that is split in training/validation).
-
-Running on cuda:0  with  1.12.0+cu102 
-
-Going to iterate over 2 subsets of 1250000 samples/tweets (separated for training/validation) to see 2500000 in total.
-Going to read 1250000 lines (625000 in each of the pos and neg datasets), starting_line:0, end_line:625000
-Loaded 1250000 tweets!
-Number of indices for training:  1187500
-Number of indices for validation:  62500
-  0% 1/148438 [00:02<97:13:17,  2.36s/it]  0% 2/148438 [00:03<64:34:07,  1.57s/it]  0% 3/148438 [00:04<53:56:32,  1.31s/it]  0% 4/148438 [00:05<48:56:10,  1.19s/it]  0% 5/148438 [00:06<45:44:48,  1.11s/it]  0% 6/148438 [00:07<45:09:29,  1.10s/it]  0% 7/148438 [00:08<44:14:54,  1.07s/it]  0% 8/148438 [00:09<43:34:00,  1.06s/it]  0% 9/148438 [00:10<42:16:18,  1.03s/it]  0% 10/148438 [00:11<41:18:07,  1.00s/it]  0% 11/148438 [00:12<40:18:53,  1.02it/s]  0% 12/148438 [00:13<40:09:01,  1.03it/s]  0% 13/148438 [00:14<41:59:15,  1.02s/it]  0% 14/148438 [00:15<41:27:57,  1.01s/it]  0% 15/148438 [00:16<40:51:23,  1.01it/s]  0% 16/148438 [00:17<41:39:53,  1.01s/it]  0% 17/148438 [00:18<42:10:24,  1.02s/it]  0% 18/148438 [00:19<41:40:42,  1.01s/it]  0% 19/148438 [00:20<41:25:25,  1.00s/it]  0% 20/148438 [00:21<40:51:18,  1.01it/s]  0% 21/148438 [00:22<40:45:03,  1.01it/s]  0% 22/148438 [00:23<40:22:54,  1.02it/s]  0% 23/148438 [00:24<40:09:06,  1.03it/s]  0% 24/148438 [00:25<40:20:01,  1.02it/s]  0% 25/148438 [00:26<40:21:03,  1.02it/s]  0% 26/148438 [00:27<40:25:22,  1.02it/s]  0% 27/148438 [00:28<40:23:46,  1.02it/s]  0% 28/148438 [00:29<40:08:07,  1.03it/s]  0% 29/148438 [00:30<40:03:34,  1.03it/s]  0% 30/148438 [00:31<40:17:17,  1.02it/s]  0% 31/148438 [00:32<40:25:15,  1.02it/s]  0% 32/148438 [00:33<40:39:57,  1.01it/s]  0% 33/148438 [00:34<40:43:44,  1.01it/s]  0% 34/148438 [00:35<40:35:03,  1.02it/s]  0% 35/148438 [00:36<41:05:07,  1.00it/s]  0% 36/148438 [00:37<40:59:41,  1.01it/s]  0% 37/148438 [00:38<41:22:59,  1.00s/it]  0% 38/148438 [00:39<41:42:06,  1.01s/it]  0% 39/148438 [00:40<40:57:02,  1.01it/s]  0% 40/148438 [00:41<40:31:00,  1.02it/s]  0% 41/148438 [00:42<40:45:53,  1.01it/s]  0% 42/148438 [00:43<41:24:21,  1.00s/it]  0% 43/148438 [00:44<41:41:21,  1.01s/it]  0% 44/148438 [00:45<41:43:07,  1.01s/it]  0% 45/148438 [00:46<41:07:48,  1.00it/s]  0% 46/148438 [00:47<41:00:46,  1.01it/s]  0% 47/148438 [00:48<40:43:02,  1.01it/s]  0% 48/148438 [00:49<41:22:38,  1.00s/it]  0% 49/148438 [00:50<41:18:20,  1.00s/it]  0% 50/148438 [00:51<40:24:50,  1.02it/s]  0% 51/148438 [00:51<40:21:55,  1.02it/s]  0% 52/148438 [00:52<40:15:33,  1.02it/s]  0% 53/148438 [00:53<40:10:19,  1.03it/s]  0% 54/148438 [00:54<40:15:02,  1.02it/s]  0% 55/148438 [00:55<40:18:59,  1.02it/s]  0% 56/148438 [00:56<40:01:45,  1.03it/s]  0% 57/148438 [00:57<39:50:35,  1.03it/s]  0% 58/148438 [00:58<40:10:57,  1.03it/s]  0% 59/148438 [00:59<40:17:14,  1.02it/s]  0% 60/148438 [01:00<40:06:09,  1.03it/s]  0% 61/148438 [01:01<39:57:05,  1.03it/s]  0% 62/148438 [01:02<39:40:06,  1.04it/s]  0% 63/148438 [01:03<40:53:27,  1.01it/s]  0% 64/148438 [01:04<41:22:54,  1.00s/it]  0% 65/148438 [01:05<40:44:33,  1.01it/s]  0% 66/148438 [01:06<40:07:58,  1.03it/s]  0% 67/148438 [01:07<40:05:09,  1.03it/s]  0% 68/148438 [01:08<41:09:52,  1.00it/s]  0% 69/148438 [01:09<41:32:12,  1.01s/it]  0% 70/148438 [01:10<40:56:44,  1.01it/s]  0% 71/148438 [01:11<40:31:23,  1.02it/s]  0% 72/148438 [01:12<40:28:52,  1.02it/s]  0% 73/148438 [01:13<40:47:38,  1.01it/s]  0% 74/148438 [01:14<41:17:42,  1.00s/it]  0% 75/148438 [01:15<41:49:03,  1.01s/it]  0% 76/148438 [01:16<41:15:18,  1.00s/it]  0% 77/148438 [01:17<40:57:31,  1.01it/s]  0% 78/148438 [01:18<41:10:35,  1.00it/s]  0% 79/148438 [01:19<41:27:02,  1.01s/it]  0% 80/148438 [01:20<41:23:25,  1.00s/it]  0% 81/148438 [01:21<41:11:31,  1.00it/s]  0% 82/148438 [01:22<40:51:45,  1.01it/s]  0% 83/148438 [01:23<41:14:43,  1.00s/it]  0% 84/148438 [01:24<41:13:41,  1.00s/it]  0% 85/148438 [01:25<41:04:52,  1.00it/s]  0% 86/148438 [01:26<40:35:53,  1.02it/s]  0% 87/148438 [01:27<40:17:40,  1.02it/s]  0% 88/148438 [01:28<40:11:31,  1.03it/s]  0% 89/148438 [01:29<40:32:10,  1.02it/s]  0% 90/148438 [01:30<40:45:21,  1.01it/s]  0% 91/148438 [01:31<40:49:44,  1.01it/s]  0% 92/148438 [01:32<41:15:47,  1.00s/it]  0% 93/148438 [01:33<42:04:30,  1.02s/it]  0% 94/148438 [01:34<42:11:42,  1.02s/it]  0% 95/148438 [01:35<41:23:11,  1.00s/it]  0% 96/148438 [01:36<41:06:12,  1.00it/s]  0% 97/148438 [01:37<41:36:45,  1.01s/it]  0% 98/148438 [01:38<41:55:35,  1.02s/it]  0% 99/148438 [01:39<41:42:36,  1.01s/it]  0% 100/148438 [01:40<41:06:35,  1.00it/s]  0% 101/148438 [01:41<40:52:16,  1.01it/s]  0% 102/148438 [01:42<40:45:28,  1.01it/s]  0% 103/148438 [01:43<40:38:17,  1.01it/s]  0% 104/148438 [01:44<40:32:47,  1.02it/s]  0% 105/148438 [01:45<40:30:03,  1.02it/s]  0% 106/148438 [01:46<40:57:30,  1.01it/s]  0% 107/148438 [01:47<40:32:37,  1.02it/s]  0% 108/148438 [01:48<40:44:49,  1.01it/s]  0% 109/148438 [01:49<40:14:52,  1.02it/s]  0% 110/148438 [01:50<41:02:42,  1.00it/s]  0% 111/148438 [01:51<42:34:15,  1.03s/it]  0% 112/148438 [01:52<42:35:01,  1.03s/it]  0% 113/148438 [01:53<41:47:30,  1.01s/it]  0% 114/148438 [01:54<41:04:35,  1.00it/s]  0% 115/148438 [01:55<40:29:54,  1.02it/s]  0% 116/148438 [01:56<40:10:52,  1.03it/s]  0% 117/148438 [01:57<40:02:54,  1.03it/s]  0% 118/148438 [01:58<40:14:12,  1.02it/s]  0% 119/148438 [01:59<41:47:29,  1.01s/it]  0% 120/148438 [02:00<41:59:58,  1.02s/it]  0% 121/148438 [02:01<41:17:42,  1.00s/it]  0% 122/148438 [02:02<40:42:51,  1.01it/s]  0% 123/148438 [02:03<40:24:17,  1.02it/s]  0% 124/148438 [02:04<40:11:20,  1.03it/s]  0% 125/148438 [02:05<40:39:29,  1.01it/s]  0% 126/148438 [02:06<40:12:50,  1.02it/s]  0% 127/148438 [02:07<39:59:15,  1.03it/s]  0% 128/148438 [02:08<40:34:23,  1.02it/s]  0% 129/148438 [02:09<40:40:58,  1.01it/s]  0% 130/148438 [02:10<41:12:41,  1.00s/it]  0% 131/148438 [02:11<40:41:27,  1.01it/s]  0% 132/148438 [02:12<40:26:36,  1.02it/s]  0% 133/148438 [02:13<40:03:00,  1.03it/s]  0% 134/148438 [02:14<40:07:24,  1.03it/s]  0% 135/148438 [02:15<41:06:08,  1.00it/s]  0% 136/148438 [02:16<40:57:39,  1.01it/s]  0% 137/148438 [02:17<40:30:22,  1.02it/s]  0% 138/148438 [02:18<40:41:01,  1.01it/s]  0% 139/148438 [02:19<41:50:03,  1.02s/it]  0% 140/148438 [02:20<41:11:15,  1.00it/s]  0% 141/148438 [02:21<40:57:11,  1.01it/s]  0% 142/148438 [02:22<40:53:03,  1.01it/s]  0% 143/148438 [02:23<40:44:04,  1.01it/s]  0% 144/148438 [02:24<40:57:32,  1.01it/s]  0% 145/148438 [02:25<40:23:52,  1.02it/s]  0% 146/148438 [02:26<40:23:49,  1.02it/s]  0% 147/148438 [02:27<40:00:17,  1.03it/s]  0% 148/148438 [02:28<40:21:58,  1.02it/s]  0% 149/148438 [02:29<40:31:41,  1.02it/s]  0% 150/148438 [02:30<40:28:07,  1.02it/s]  0% 151/148438 [02:37<116:26:06,  2.83s/it]  0% 152/148438 [02:38<93:55:54,  2.28s/it]   0% 153/148438 [02:39<78:21:31,  1.90s/it]  0% 154/148438 [02:40<67:31:22,  1.64s/it]  0% 155/148438 [02:41<59:04:44,  1.43s/it]  0% 156/148438 [02:42<53:14:00,  1.29s/it]  0% 157/148438 [02:43<49:42:31,  1.21s/it]  0% 158/148438 [02:44<46:48:04,  1.14s/it]  0% 159/148438 [02:45<44:58:59,  1.09s/it]  0% 160/148438 [02:46<44:33:08,  1.08s/it]  0% 161/148438 [02:47<43:19:32,  1.05s/it]  0% 162/148438 [02:48<42:06:08,  1.02s/it]  0% 163/148438 [02:49<41:50:27,  1.02s/it]  0% 164/148438 [02:50<42:24:33,  1.03s/it]  0% 165/148438 [02:51<42:34:32,  1.03s/it]  0% 166/148438 [02:52<41:57:04,  1.02s/it]  0% 167/148438 [02:53<41:05:12,  1.00it/s]  0% 168/148438 [02:54<41:14:21,  1.00s/it]  0% 169/148438 [02:55<41:11:56,  1.00s/it]  0% 170/148438 [02:56<41:55:39,  1.02s/it]  0% 171/148438 [02:57<41:05:02,  1.00it/s]  0% 172/148438 [02:58<40:34:54,  1.01it/s]  0% 173/148438 [02:59<40:20:26,  1.02it/s]  0% 174/148438 [03:00<40:06:12,  1.03it/s]  0% 175/148438 [03:01<40:13:11,  1.02it/s]  0% 176/148438 [03:02<41:18:47,  1.00s/it]  0% 177/148438 [03:03<41:07:37,  1.00it/s]  0% 178/148438 [03:04<41:37:05,  1.01s/it]  0% 179/148438 [03:05<41:48:26,  1.02s/it]  0% 180/148438 [03:06<41:54:23,  1.02s/it]  0% 181/148438 [03:07<41:31:57,  1.01s/it]  0% 182/148438 [03:08<41:00:22,  1.00it/s]  0% 183/148438 [03:09<41:10:48,  1.00it/s]  0% 184/148438 [03:10<40:55:59,  1.01it/s]  0% 185/148438 [03:11<41:40:37,  1.01s/it]  0% 186/148438 [03:12<40:56:28,  1.01it/s]  0% 187/148438 [03:13<40:52:42,  1.01it/s]  0% 188/148438 [03:14<40:20:21,  1.02it/s]  0% 189/148438 [03:15<40:27:19,  1.02it/s]  0% 190/148438 [03:16<40:53:54,  1.01it/s]  0% 191/148438 [03:17<41:14:18,  1.00s/it]  0% 192/148438 [03:18<40:42:25,  1.01it/s]  0% 193/148438 [03:19<40:27:27,  1.02it/s]  0% 194/148438 [03:20<41:44:04,  1.01s/it]  0% 195/148438 [03:21<41:16:46,  1.00s/it]  0% 196/148438 [03:22<41:18:31,  1.00s/it]  0% 197/148438 [03:23<40:34:19,  1.01it/s]  0% 198/148438 [03:23<39:58:23,  1.03it/s]  0% 199/148438 [03:24<39:49:11,  1.03it/s]  0% 200/148438 [03:25<39:42:14,  1.04it/s]  0% 201/148438 [03:26<39:45:52,  1.04it/s]  0% 202/148438 [03:27<39:48:39,  1.03it/s]  0% 203/148438 [03:28<40:51:26,  1.01it/s]  0% 204/148438 [03:29<41:09:35,  1.00it/s]  0% 205/148438 [03:30<41:09:37,  1.00it/s]  0% 206/148438 [03:31<40:34:17,  1.01it/s]  0% 207/148438 [03:32<40:16:28,  1.02it/s]  0% 208/148438 [03:33<40:07:43,  1.03it/s]  0% 209/148438 [03:34<40:12:13,  1.02it/s]  0% 210/148438 [03:35<40:12:30,  1.02it/s]  0% 211/148438 [03:36<40:45:27,  1.01it/s]  0% 212/148438 [03:37<40:40:22,  1.01it/s]  0% 213/148438 [03:38<40:22:49,  1.02it/s]  0% 214/148438 [03:39<40:06:31,  1.03it/s]  0% 215/148438 [03:40<39:51:31,  1.03it/s]  0% 216/148438 [03:41<39:44:46,  1.04it/s]  0% 217/148438 [03:42<39:38:51,  1.04it/s]  0% 218/148438 [03:43<39:40:49,  1.04it/s]  0% 219/148438 [03:44<39:37:46,  1.04it/s]  0% 220/148438 [03:45<39:31:20,  1.04it/s]  0% 221/148438 [03:46<39:30:33,  1.04it/s]  0% 222/148438 [03:47<39:41:00,  1.04it/s]  0% 223/148438 [03:48<39:37:24,  1.04it/s]  0% 224/148438 [03:49<39:44:27,  1.04it/s]  0% 225/148438 [03:50<39:48:07,  1.03it/s]  0% 226/148438 [03:51<40:14:00,  1.02it/s]  0% 227/148438 [03:52<41:06:12,  1.00it/s]  0% 228/148438 [03:53<40:50:34,  1.01it/s]  0% 229/148438 [03:54<40:37:15,  1.01it/s]  0% 230/148438 [03:55<40:17:03,  1.02it/s]  0% 231/148438 [03:56<41:26:24,  1.01s/it]  0% 232/148438 [03:57<41:25:25,  1.01s/it]  0% 233/148438 [03:58<40:43:51,  1.01it/s]  0% 234/148438 [03:59<40:34:58,  1.01it/s]  0% 235/148438 [04:00<40:20:04,  1.02it/s]  0% 236/148438 [04:01<40:17:50,  1.02it/s]  0% 237/148438 [04:02<40:27:12,  1.02it/s]  0% 238/148438 [04:03<40:07:04,  1.03it/s]  0% 239/148438 [04:04<40:34:08,  1.01it/s]  0% 240/148438 [04:05<39:56:55,  1.03it/s]  0% 241/148438 [04:05<39:23:18,  1.05it/s]  0% 242/148438 [04:06<38:43:51,  1.06it/s]  0% 243/148438 [04:07<38:27:35,  1.07it/s]  0% 244/148438 [04:08<39:17:20,  1.05it/s]  0% 245/148438 [04:09<41:07:40,  1.00it/s]  0% 246/148438 [04:10<41:38:19,  1.01s/it]  0% 247/148438 [04:11<41:28:48,  1.01s/it]  0% 248/148438 [04:12<41:15:39,  1.00s/it]  0% 249/148438 [04:13<40:42:04,  1.01it/s]  0% 250/148438 [04:14<41:36:27,  1.01s/it]  0% 251/148438 [04:15<40:25:07,  1.02it/s]  0% 252/148438 [04:16<40:16:28,  1.02it/s]  0% 253/148438 [04:17<40:10:37,  1.02it/s]  0% 254/148438 [04:18<40:21:19,  1.02it/s]  0% 255/148438 [04:19<40:41:52,  1.01it/s]  0% 256/148438 [04:20<41:22:23,  1.01s/it]  0% 257/148438 [04:21<41:01:15,  1.00it/s]  0% 258/148438 [04:22<40:35:35,  1.01it/s]  0% 259/148438 [04:23<40:43:28,  1.01it/s]  0% 260/148438 [04:24<41:37:18,  1.01s/it]  0% 261/148438 [04:25<41:12:40,  1.00s/it]  0% 262/148438 [04:26<40:39:15,  1.01it/s]  0% 263/148438 [04:27<40:26:57,  1.02it/s]  0% 264/148438 [04:28<40:54:31,  1.01it/s]  0% 265/148438 [04:29<41:29:23,  1.01s/it]  0% 266/148438 [04:30<41:14:03,  1.00s/it]  0% 267/148438 [04:31<40:57:53,  1.00it/s]  0% 268/148438 [04:32<40:31:52,  1.02it/s]  0% 269/148438 [04:33<40:21:59,  1.02it/s]  0% 270/148438 [04:34<39:54:30,  1.03it/s]  0% 271/148438 [04:35<40:10:29,  1.02it/s]  0% 272/148438 [04:36<39:49:24,  1.03it/s]  0% 273/148438 [04:37<39:36:47,  1.04it/s]  0% 274/148438 [04:38<39:45:52,  1.04it/s]  0% 275/148438 [04:39<41:06:36,  1.00it/s]  0% 276/148438 [04:40<41:19:40,  1.00s/it]  0% 277/148438 [04:41<40:43:06,  1.01it/s]  0% 278/148438 [04:42<40:31:40,  1.02it/s]  0% 279/148438 [04:43<40:31:35,  1.02it/s]  0% 280/148438 [04:44<41:13:20,  1.00s/it]  0% 281/148438 [04:45<41:12:04,  1.00s/it]  0% 282/148438 [04:46<40:35:58,  1.01it/s]  0% 283/148438 [04:47<40:19:30,  1.02it/s]  0% 284/148438 [04:48<40:00:56,  1.03it/s]  0% 285/148438 [04:49<40:36:05,  1.01it/s]  0% 286/148438 [04:50<41:31:01,  1.01s/it]  0% 287/148438 [04:51<41:25:25,  1.01s/it]  0% 288/148438 [04:52<40:55:54,  1.01it/s]  0% 289/148438 [04:53<40:45:46,  1.01it/s]  0% 290/148438 [04:54<41:36:26,  1.01s/it]  0% 291/148438 [04:55<41:49:30,  1.02s/it]  0% 292/148438 [04:56<41:15:37,  1.00s/it]  0% 293/148438 [04:57<40:58:12,  1.00it/s]  0% 294/148438 [04:58<40:27:30,  1.02it/s]  0% 295/148438 [04:59<40:02:33,  1.03it/s]  0% 296/148438 [05:00<39:49:37,  1.03it/s]  0% 297/148438 [05:01<39:47:58,  1.03it/s]  0% 298/148438 [05:02<40:05:18,  1.03it/s]  0% 299/148438 [05:03<40:19:49,  1.02it/s]  0% 300/148438 [05:04<41:20:34,  1.00s/it]  0% 301/148438 [05:05<41:16:44,  1.00s/it]  0% 302/148438 [05:06<41:05:56,  1.00it/s]  0% 303/148438 [05:07<40:59:45,  1.00it/s]  0% 304/148438 [05:08<40:31:53,  1.02it/s]  0% 305/148438 [05:09<40:27:34,  1.02it/s]  0% 306/148438 [05:10<40:55:55,  1.01it/s]  0% 307/148438 [05:11<41:31:28,  1.01s/it]  0% 308/148438 [05:12<41:01:19,  1.00it/s]  0% 309/148438 [05:13<40:23:51,  1.02it/s]  0% 310/148438 [05:14<41:04:57,  1.00it/s]  0% 311/148438 [05:15<40:51:37,  1.01it/s]  0% 312/148438 [05:16<40:33:38,  1.01it/s]  0% 313/148438 [05:17<40:22:50,  1.02it/s]  0% 314/148438 [05:18<40:13:29,  1.02it/s]  0% 315/148438 [05:19<41:30:32,  1.01s/it]  0% 316/148438 [05:20<41:24:00,  1.01s/it]  0% 317/148438 [05:21<40:48:36,  1.01it/s]  0% 318/148438 [05:22<40:20:17,  1.02it/s]  0% 319/148438 [05:23<40:53:52,  1.01it/s]  0% 320/148438 [05:24<40:39:13,  1.01it/s]  0% 321/148438 [05:25<40:39:30,  1.01it/s]  0% 322/148438 [05:26<40:30:14,  1.02it/s]  0% 323/148438 [05:27<40:19:02,  1.02it/s]  0% 324/148438 [05:28<39:56:43,  1.03it/s]  0% 325/148438 [05:29<39:54:49,  1.03it/s]  0% 326/148438 [05:30<40:18:43,  1.02it/s]  0% 327/148438 [05:30<39:56:12,  1.03it/s]  0% 328/148438 [05:31<39:48:09,  1.03it/s]  0% 329/148438 [05:32<39:44:17,  1.04it/s]  0% 330/148438 [05:33<39:52:20,  1.03it/s]  0% 331/148438 [05:34<39:59:02,  1.03it/s]  0% 332/148438 [05:35<39:59:37,  1.03it/s]  0% 333/148438 [05:36<40:09:09,  1.02it/s]  0% 334/148438 [05:37<39:59:53,  1.03it/s]  0% 335/148438 [05:38<39:58:34,  1.03it/s]  0% 336/148438 [05:39<41:13:16,  1.00s/it]  0% 337/148438 [05:40<41:09:44,  1.00s/it]  0% 338/148438 [05:41<40:45:33,  1.01it/s]  0% 339/148438 [05:42<40:30:49,  1.02it/s]  0% 340/148438 [05:43<41:12:35,  1.00s/it]  0% 341/148438 [05:44<42:34:18,  1.03s/it]  0% 342/148438 [05:45<42:15:22,  1.03s/it]  0% 343/148438 [05:46<41:25:28,  1.01s/it]  0% 344/148438 [05:47<40:51:05,  1.01it/s]  0% 345/148438 [05:48<40:23:30,  1.02it/s]  0% 346/148438 [05:49<40:21:06,  1.02it/s]  0% 347/148438 [05:50<40:51:59,  1.01it/s]  0% 348/148438 [05:51<41:09:30,  1.00s/it]  0% 349/148438 [05:52<40:53:26,  1.01it/s]  0% 350/148438 [05:53<42:01:13,  1.02s/it]  0% 351/148438 [05:54<42:02:21,  1.02s/it]  0% 352/148438 [05:55<41:47:17,  1.02s/it]  0% 353/148438 [05:56<41:12:44,  1.00s/it]  0% 354/148438 [05:57<41:19:20,  1.00s/it]  0% 355/148438 [05:58<41:06:24,  1.00it/s]  0% 356/148438 [05:59<42:13:25,  1.03s/it]  0% 357/148438 [06:00<41:25:48,  1.01s/it]  0% 358/148438 [06:01<40:40:00,  1.01it/s]  0% 359/148438 [06:02<41:01:03,  1.00it/s]  0% 360/148438 [06:03<40:51:51,  1.01it/s]  0% 361/148438 [06:04<40:25:38,  1.02it/s]  0% 362/148438 [06:05<40:33:28,  1.01it/s]  0% 363/148438 [06:06<40:12:09,  1.02it/s]  0% 364/148438 [06:07<40:25:53,  1.02it/s]  0% 365/148438 [06:08<40:02:23,  1.03it/s]  0% 366/148438 [06:09<39:12:30,  1.05it/s]  0% 367/148438 [06:10<38:32:33,  1.07it/s]  0% 368/148438 [06:11<38:36:42,  1.07it/s]  0% 369/148438 [06:12<38:31:42,  1.07it/s]  0% 370/148438 [06:13<38:45:53,  1.06it/s]  0% 371/148438 [06:14<39:03:19,  1.05it/s]  0% 372/148438 [06:15<39:04:39,  1.05it/s]  0% 373/148438 [06:16<39:01:55,  1.05it/s]  0% 374/148438 [06:17<39:00:45,  1.05it/s]  0% 375/148438 [06:18<38:35:54,  1.07it/s]  0% 376/148438 [06:19<38:49:49,  1.06it/s]  0% 377/148438 [06:20<39:11:36,  1.05it/s]  0% 378/148438 [06:21<40:11:13,  1.02it/s]  0% 379/148438 [06:22<40:19:06,  1.02it/s]  0% 380/148438 [06:22<39:47:03,  1.03it/s]  0% 381/148438 [06:24<40:20:16,  1.02it/s]  0% 382/148438 [06:25<41:18:55,  1.00s/it]  0% 383/148438 [06:26<41:36:58,  1.01s/it]  0% 384/148438 [06:27<41:52:51,  1.02s/it]  0% 385/148438 [06:28<41:48:23,  1.02s/it]  0% 386/148438 [06:29<41:11:30,  1.00s/it]  0% 387/148438 [06:30<40:50:32,  1.01it/s]  0% 388/148438 [06:31<40:47:43,  1.01it/s]  0% 389/148438 [06:32<41:07:41,  1.00s/it]  0% 390/148438 [06:33<41:21:07,  1.01s/it]  0% 391/148438 [06:34<41:08:54,  1.00s/it]  0% 392/148438 [06:35<42:12:55,  1.03s/it]  0% 393/148438 [06:36<42:44:29,  1.04s/it]  0% 394/148438 [06:37<41:59:37,  1.02s/it]  0% 395/148438 [06:38<41:18:06,  1.00s/it]  0% 396/148438 [06:39<40:41:59,  1.01it/s]  0% 397/148438 [06:40<40:26:03,  1.02it/s]  0% 398/148438 [06:41<41:06:37,  1.00it/s]  0% 399/148438 [06:42<40:56:08,  1.00it/s]  0% 400/148438 [06:43<41:21:40,  1.01s/it]  0% 401/148438 [06:44<41:09:48,  1.00s/it]  0% 402/148438 [06:45<40:49:34,  1.01it/s]  0% 403/148438 [06:46<41:22:43,  1.01s/it]  0% 404/148438 [06:47<41:10:44,  1.00s/it]  0% 405/148438 [06:48<40:50:03,  1.01it/s]  0% 406/148438 [06:49<40:23:56,  1.02it/s]  0% 407/148438 [06:50<40:35:06,  1.01it/s]  0% 408/148438 [06:51<40:14:48,  1.02it/s]  0% 409/148438 [06:52<40:30:25,  1.02it/s]  0% 410/148438 [06:53<41:20:04,  1.01s/it]  0% 411/148438 [06:54<41:06:48,  1.00it/s]  0% 412/148438 [06:55<40:56:02,  1.00it/s]  0% 413/148438 [06:56<40:53:28,  1.01it/s]  0% 414/148438 [06:57<41:08:35,  1.00s/it]  0% 415/148438 [06:58<40:31:18,  1.01it/s]  0% 416/148438 [06:59<41:01:04,  1.00it/s]  0% 417/148438 [07:00<40:51:21,  1.01it/s]  0% 418/148438 [07:01<42:40:36,  1.04s/it]  0% 419/148438 [07:02<41:34:05,  1.01s/it]  0% 420/148438 [07:03<40:50:10,  1.01it/s]  0% 421/148438 [07:04<40:49:32,  1.01it/s]  0% 422/148438 [07:05<40:55:24,  1.00it/s]  0% 423/148438 [07:06<40:28:53,  1.02it/s]  0% 424/148438 [07:07<40:52:51,  1.01it/s]  0% 425/148438 [07:08<40:58:57,  1.00it/s]  0% 426/148438 [07:09<40:47:29,  1.01it/s]  0% 427/148438 [07:10<41:07:05,  1.00s/it]  0% 428/148438 [07:11<41:06:44,  1.00it/s]  0% 429/148438 [07:12<41:42:43,  1.01s/it]  0% 430/148438 [07:13<41:44:57,  1.02s/it]  0% 431/148438 [07:14<41:00:26,  1.00it/s]  0% 432/148438 [07:15<40:40:36,  1.01it/s]  0% 433/148438 [07:16<40:41:00,  1.01it/s]  0% 434/148438 [07:17<41:22:45,  1.01s/it]  0% 435/148438 [07:18<41:06:11,  1.00it/s]  0% 436/148438 [07:19<40:34:19,  1.01it/s]  0% 437/148438 [07:19<40:13:45,  1.02it/s]  0% 438/148438 [07:20<39:57:26,  1.03it/s]  0% 439/148438 [07:21<40:41:49,  1.01it/s]  0% 440/148438 [07:23<41:10:37,  1.00s/it]  0% 441/148438 [07:23<40:55:15,  1.00it/s]  0% 442/148438 [07:24<40:20:20,  1.02it/s]  0% 443/148438 [07:25<40:52:44,  1.01it/s]  0% 444/148438 [07:26<41:13:23,  1.00s/it]  0% 445/148438 [07:27<40:48:00,  1.01it/s]  0% 446/148438 [07:28<40:14:34,  1.02it/s]  0% 447/148438 [07:29<40:22:50,  1.02it/s]  0% 448/148438 [07:30<40:33:45,  1.01it/s]  0% 449/148438 [07:31<41:13:17,  1.00s/it]  0% 450/148438 [07:32<40:34:15,  1.01it/s]  0% 451/148438 [07:33<40:04:58,  1.03it/s]  0% 452/148438 [07:34<39:46:08,  1.03it/s]  0% 453/148438 [07:35<39:32:25,  1.04it/s]  0% 454/148438 [07:36<39:33:15,  1.04it/s]  0% 455/148438 [07:37<40:35:31,  1.01it/s]  0% 456/148438 [07:38<40:26:10,  1.02it/s]  0% 457/148438 [07:39<40:03:55,  1.03it/s]  0% 458/148438 [07:40<40:30:16,  1.01it/s]  0% 459/148438 [07:41<41:36:44,  1.01s/it]  0% 460/148438 [07:42<40:52:10,  1.01it/s]  0% 461/148438 [07:43<40:32:14,  1.01it/s]  0% 462/148438 [07:44<40:07:30,  1.02it/s]  0% 463/148438 [07:45<40:46:10,  1.01it/s]  0% 464/148438 [07:46<40:54:18,  1.00it/s]  0% 465/148438 [07:47<40:20:28,  1.02it/s]  0% 466/148438 [07:48<39:54:52,  1.03it/s]  0% 467/148438 [07:55<114:29:07,  2.79s/it]  0% 468/148438 [07:56<92:55:01,  2.26s/it]   0% 469/148438 [07:57<77:51:53,  1.89s/it]  0% 470/148438 [07:58<67:22:16,  1.64s/it]  0% 471/148438 [07:59<59:13:58,  1.44s/it]  0% 472/148438 [08:00<53:27:30,  1.30s/it]  0% 473/148438 [08:01<49:09:48,  1.20s/it]  0% 474/148438 [08:02<46:26:36,  1.13s/it]  0% 475/148438 [08:03<44:23:36,  1.08s/it]  0% 476/148438 [08:04<42:50:19,  1.04s/it]  0% 477/148438 [08:05<41:48:36,  1.02s/it]  0% 478/148438 [08:06<41:06:12,  1.00s/it]  0% 479/148438 [08:07<41:03:26,  1.00it/s]  0% 480/148438 [08:08<41:34:37,  1.01s/it]  0% 481/148438 [08:09<41:05:42,  1.00it/s]  0% 482/148438 [08:10<40:41:18,  1.01it/s]  0% 483/148438 [08:11<40:37:29,  1.01it/s]  0% 484/148438 [08:12<40:43:57,  1.01it/s]  0% 485/148438 [08:13<40:35:55,  1.01it/s]  0% 486/148438 [08:14<40:44:16,  1.01it/s]  0% 487/148438 [08:15<41:29:01,  1.01s/it]  0% 488/148438 [08:16<41:16:18,  1.00s/it]  0% 489/148438 [08:17<41:10:50,  1.00s/it]  0% 490/148438 [08:18<42:01:45,  1.02s/it]  0% 491/148438 [08:19<42:32:34,  1.04s/it]  0% 492/148438 [08:20<41:27:58,  1.01s/it]  0% 493/148438 [08:21<40:52:08,  1.01it/s]  0% 494/148438 [08:22<41:04:28,  1.00it/s]  0% 495/148438 [08:23<41:21:38,  1.01s/it]  0% 496/148438 [08:24<40:59:31,  1.00it/s]  0% 497/148438 [08:25<40:27:23,  1.02it/s]  0% 498/148438 [08:26<40:20:38,  1.02it/s]  0% 499/148438 [08:27<40:00:02,  1.03it/s]  0% 500/148438 [08:28<45:34:39,  1.11s/it]  0% 501/148438 [08:29<44:51:51,  1.09s/it]  0% 502/148438 [08:30<43:31:58,  1.06s/it]  0% 503/148438 [08:31<42:20:16,  1.03s/it]  0% 504/148438 [08:32<42:20:47,  1.03s/it]  0% 505/148438 [08:33<42:40:08,  1.04s/it]  0% 506/148438 [08:34<42:01:45,  1.02s/it]  0% 507/148438 [08:35<41:37:12,  1.01s/it]  0% 508/148438 [08:36<41:54:38,  1.02s/it]  0% 509/148438 [08:37<42:12:41,  1.03s/it]  0% 510/148438 [08:38<42:18:26,  1.03s/it]  0% 511/148438 [08:39<42:07:49,  1.03s/it]  0% 512/148438 [08:40<41:28:41,  1.01s/it]  0% 513/148438 [08:41<41:14:34,  1.00s/it]  0% 514/148438 [08:42<41:04:47,  1.00it/s]  0% 515/148438 [08:43<41:41:51,  1.01s/it]  0% 516/148438 [08:44<41:16:18,  1.00s/it]  0% 517/148438 [08:45<41:07:01,  1.00s/it]  0% 518/148438 [08:46<41:16:43,  1.00s/it]  0% 519/148438 [08:47<41:03:39,  1.00it/s]  0% 520/148438 [08:48<41:06:51,  1.00s/it]  0% 521/148438 [08:49<40:39:38,  1.01it/s]  0% 522/148438 [08:50<40:25:03,  1.02it/s]  0% 523/148438 [08:51<40:17:43,  1.02it/s]  0% 524/148438 [08:52<40:17:49,  1.02it/s]  0% 525/148438 [08:53<40:58:37,  1.00it/s]  0% 526/148438 [08:54<40:40:10,  1.01it/s]  0% 527/148438 [08:55<40:27:43,  1.02it/s]  0% 528/148438 [08:56<40:29:56,  1.01it/s]  0% 529/148438 [08:57<40:23:10,  1.02it/s]  0% 530/148438 [08:58<40:05:32,  1.02it/s]  0% 531/148438 [08:59<40:15:03,  1.02it/s]  0% 532/148438 [09:00<40:39:35,  1.01it/s]  0% 533/148438 [09:01<40:21:22,  1.02it/s]  0% 534/148438 [09:02<40:10:18,  1.02it/s]  0% 535/148438 [09:03<41:01:21,  1.00it/s]  0% 536/148438 [09:04<41:51:12,  1.02s/it]  0% 537/148438 [09:05<41:20:57,  1.01s/it]  0% 538/148438 [09:06<40:54:05,  1.00it/s]  0% 539/148438 [09:07<41:13:15,  1.00s/it]  0% 540/148438 [09:08<42:17:30,  1.03s/it]  0% 541/148438 [09:09<41:09:05,  1.00s/it]  0% 542/148438 [09:10<40:31:34,  1.01it/s]  0% 543/148438 [09:11<40:04:57,  1.02it/s]  0% 544/148438 [09:12<39:53:56,  1.03it/s]  0% 545/148438 [09:13<40:08:17,  1.02it/s]  0% 546/148438 [09:14<40:21:36,  1.02it/s]  0% 547/148438 [09:15<40:41:11,  1.01it/s]  0% 548/148438 [09:16<40:35:46,  1.01it/s]  0% 549/148438 [09:17<40:42:09,  1.01it/s]  0% 550/148438 [09:18<41:52:07,  1.02s/it]  0% 551/148438 [09:19<41:32:21,  1.01s/it]  0% 552/148438 [09:20<40:52:04,  1.01it/s]  0% 553/148438 [09:21<40:24:41,  1.02it/s]  0% 554/148438 [09:22<39:58:56,  1.03it/s]  0% 555/148438 [09:23<40:11:22,  1.02it/s]  0% 556/148438 [09:24<40:18:47,  1.02it/s]  0% 557/148438 [09:25<40:02:51,  1.03it/s]  0% 558/148438 [09:26<39:51:23,  1.03it/s]  0% 559/148438 [09:27<40:20:00,  1.02it/s]  0% 560/148438 [09:28<40:19:41,  1.02it/s]  0% 561/148438 [09:29<40:33:35,  1.01it/s]  0% 562/148438 [09:30<40:11:59,  1.02it/s]  0% 563/148438 [09:31<39:57:05,  1.03it/s]  0% 564/148438 [09:32<39:42:41,  1.03it/s]  0% 565/148438 [09:33<39:35:18,  1.04it/s]  0% 566/148438 [09:34<39:37:15,  1.04it/s]  0% 567/148438 [09:35<40:27:54,  1.02it/s]  0% 568/148438 [09:36<40:38:37,  1.01it/s]  0% 569/148438 [09:37<40:22:10,  1.02it/s]  0% 570/148438 [09:38<40:16:41,  1.02it/s]  0% 571/148438 [09:39<40:52:30,  1.00it/s]  0% 572/148438 [09:40<41:25:38,  1.01s/it]  0% 573/148438 [09:41<40:53:19,  1.00it/s]  0% 574/148438 [09:42<40:28:59,  1.01it/s]  0% 575/148438 [09:43<41:01:16,  1.00it/s]  0% 576/148438 [09:44<41:48:54,  1.02s/it]  0% 577/148438 [09:45<42:23:52,  1.03s/it]  0% 578/148438 [09:46<41:26:44,  1.01s/it]  0% 579/148438 [09:47<40:47:01,  1.01it/s]  0% 580/148438 [09:48<40:30:32,  1.01it/s]  0% 581/148438 [09:49<40:00:42,  1.03it/s]  0% 582/148438 [09:50<40:23:53,  1.02it/s]  0% 583/148438 [09:51<41:15:22,  1.00s/it]  0% 584/148438 [09:52<41:12:16,  1.00s/it]  0% 585/148438 [09:53<40:36:32,  1.01it/s]  0% 586/148438 [09:54<40:53:00,  1.00it/s]  0% 587/148438 [09:55<41:58:47,  1.02s/it]  0% 588/148438 [09:56<41:06:28,  1.00s/it]Traceback (most recent call last):
-  File "SCAL_transformer.py", line 472, in <module>
-    model = run_training(model)
-  File "SCAL_transformer.py", line 340, in run_training
-    trained_model = load_and_train(model, amount_per_it, iteration)
-  File "SCAL_transformer.py", line 291, in load_and_train
-    train(model, train_dataset, val_dataset)
-  File "SCAL_transformer.py", line 237, in train
-    trainer.train()
-  File "/cluster/home/mezhang/miniconda3/envs/cil_env/lib/python3.7/site-packages/transformers/trainer.py", line 1413, in train
-    ignore_keys_for_eval=ignore_keys_for_eval,
-  File "/cluster/home/mezhang/miniconda3/envs/cil_env/lib/python3.7/site-packages/transformers/trainer.py", line 1651, in _inner_training_loop
-    tr_loss_step = self.training_step(model, inputs)
-  File "/cluster/home/mezhang/miniconda3/envs/cil_env/lib/python3.7/site-packages/transformers/trainer.py", line 2363, in training_step
-    loss.backward()
-  File "/cluster/home/mezhang/miniconda3/envs/cil_env/lib/python3.7/site-packages/torch/_tensor.py", line 396, in backward
-    torch.autograd.backward(self, gradient, retain_graph, create_graph, inputs=inputs)
-  File "/cluster/home/mezhang/miniconda3/envs/cil_env/lib/python3.7/site-packages/torch/autograd/__init__.py", line 175, in backward
-    allow_unreachable=True, accumulate_grad=True)  # Calls into the C++ engine to run the backward pass
-KeyboardInterrupt
-wandb: Waiting for W&B process to finish... (failed 255). Press Control-C to abort syncing.
-wandb: - 0.001 MB of 0.001 MB uploaded (0.000 MB deduped)wandb: \ 0.001 MB of 0.001 MB uploaded (0.000 MB deduped)wandb: | 0.001 MB of 0.001 MB uploaded (0.000 MB deduped)wandb: / 0.001 MB of 0.001 MB uploaded (0.000 MB deduped)wandb: - 0.001 MB of 0.445 MB uploaded (0.000 MB deduped)wandb: \ 0.001 MB of 0.445 MB uploaded (0.000 MB deduped)wandb: | 0.001 MB of 0.445 MB uploaded (0.000 MB deduped)wandb: / 0.001 MB of 0.445 MB uploaded (0.000 MB deduped)wandb: - 0.442 MB of 0.445 MB uploaded (0.000 MB deduped)wandb: \ 0.445 MB of 0.445 MB uploaded (0.000 MB deduped)wandb: | 0.445 MB of 0.445 MB uploaded (0.000 MB deduped)wandb: / 0.445 MB of 0.445 MB uploaded (0.000 MB deduped)wandb: - 0.445 MB of 0.445 MB uploaded (0.000 MB deduped)wandb: \ 0.445 MB of 0.445 MB uploaded (0.000 MB deduped)wandb: | 0.445 MB of 0.445 MB uploaded (0.000 MB deduped)wandb: / 0.445 MB of 0.445 MB uploaded (0.000 MB deduped)wandb:                                                                                
-wandb: Synced summer-lake-29: https://wandb.ai/mezhang/twitter-sentiment-analysis-scal/runs/2623wl23
-wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
-wandb: Find logs at: ./wandb/run-20220726_223340-2623wl23/logs
+wandb: - 0.001 MB of 0.001 MB uploaded (0.000 MB deduped)wandb: \ 0.001 MB of 0.001 MB uploaded (0.000 MB deduped)wandb: | 0.001 MB of 0.001 MB uploaded (0.000 MB deduped)wandb: / 0.001 MB of 0.010 MB uploaded (0.000 MB deduped)wandb: - 0.001 MB of 0.010 MB uploaded (0.000 MB deduped)wandb: \ 0.001 MB of 0.010 MB uploaded (0.000 MB deduped)wandb: | 0.010 MB of 0.010 MB uploaded (0.000 MB deduped)wandb: / 0.010 MB of 0.010 MB uploaded (0.000 MB deduped)wandb: - 0.010 MB of 0.010 MB uploaded (0.000 MB deduped)wandb: \ 0.010 MB of 0.010 MB uploaded (0.000 MB deduped)wandb: | 0.010 MB of 0.010 MB uploaded (0.000 MB deduped)wandb: / 0.010 MB of 0.010 MB uploaded (0.000 MB deduped)wandb: - 0.010 MB of 0.010 MB uploaded (0.000 MB deduped)wandb: \ 0.010 MB of 0.010 MB uploaded (0.000 MB deduped)wandb:                                                                                
+/cluster/home/mezhang/miniconda3/envs/cil_env/lib/python3.7/multiprocessing/semaphore_tracker.py:144: UserWarning: semaphore_tracker: There appear to be 6 leaked semaphores to clean up at shutdown
+  len(cache))
 Terminated

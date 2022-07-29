@@ -78,7 +78,7 @@ class ContextPooler(nn.Module):
         return self.hidden_size
 
 class MyScalModel(PreTrainedModel):
-	def __init__(self, model_name, num_labels = 2, temperature = 0.05, epsilon = 0.2, alpha = 0.5, beta = 1.0):
+	def __init__(self, config = None, model_name = "microsoft/deberta-v3-base", num_labels = 2, temperature = 0.05, epsilon = 0.2, alpha = 0.5, beta = 1.0):
 		model = AutoModel.from_pretrained(model_name, num_labels = num_labels)
 		self.config = model.config
 		#self.config.layer_norm_eps = 1e-6
