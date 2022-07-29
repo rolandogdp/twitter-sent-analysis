@@ -17,7 +17,7 @@ from transformers import AutoModelForSequenceClassification
 from transformers import TrainingArguments     # https://huggingface.co/transformers/v3.0.2/main_classes/trainer.html#transformers.TFTrainingArguments
 from transformers import Trainer    # https://huggingface.co/transformers/v3.0.2/main_classes/trainer
 from transformers import DataCollatorForLanguageModeling
-
+from myModel import MyModel
 from transformers import pipeline
 from datasets import load_metric
 from datasets import load_dataset
@@ -237,7 +237,7 @@ def train(model, train_dataset, val_dataset, iteration):
                                     logging_steps=500,
                                     load_best_model_at_end=True,
                                     num_train_epochs=config.n_epochs,
-                                    report_to="wandb" # WANDB INTEGRATION
+                                    #report_to="wandb" # WANDB INTEGRATION
                                     )
 
 
@@ -371,7 +371,8 @@ def run_training(model):
     print(f"Going to iterate over {number_of_iterations} subsets of {amount_per_it} samples/tweets (separated for training/validation) to see {total_amount_of_tweets} in total.")
     send_discord_notif("Starting Training", f"Going to iterate over {number_of_iterations} subsets of {amount_per_it} samples/tweets (separated for training/validation) to see {total_amount_of_tweets} in total.", orange, None)
     wandb_project_name = f"cil-{model_name}".replace("/","-").replace("\\","").replace("?","").replace("%","").replace(":","")
-    wandb.init(project=wandb_project_name)
+    #wandb.init(project=wandb_project_name)
+    os.environ["WANDB_DISABLED"] = "true"
     try:
         total_subsets = range(number_of_iterations)[config.start_at_it:]
 
@@ -501,7 +502,7 @@ if __name__ == "__main__":
     discord_enabled = config.discord
 
     # Create the model
-    model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=config.num_labels, local_files_only=False, ignore_mismatched_sizes=True)
+    model = MyModel(model_name)
     
         # If we need to load a model from a checkpoint or not
     if not (config.load_model is None):
