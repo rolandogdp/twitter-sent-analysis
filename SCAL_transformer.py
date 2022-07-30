@@ -260,7 +260,7 @@ def train(model, train_dataset_param, val_dataset_param):
                                     metric_for_best_model = "eval_loss",
                                     greater_is_better = False,
                                     #wandb
-                                    report_to='wandb'
+                                    #report_to='wandb'
                                     )
     
     if not (train_dataset_param is None) and not (val_dataset_param is None):
@@ -289,12 +289,33 @@ def load_model_from_path(model_path):
     
     return AutoModelForSequenceClassification.from_pretrained(model_path, num_labels=config.num_labels, local_files_only=False, ignore_mismatched_sizes=True)
 
+def numpy_2d_softmax(model_preds):
+    max = np.max(model_preds, axis=1, keepdims=True)
+    e_x = np.exp(model_preds-max)
+    sum = np.sum(e_x, axis=1, keepdims=True)
+    out = e_x / sum 
+    return out
+
 def test(model):
+
     test_trainer = MyScalTrainer(model)
     tweets = get_test_data(load_test_data())
     raw_preds, _, _ = test_trainer.predict(tweets)     # only predictions to return, no label ids, no metrics; see HF Trainer doc
     Y_test_pred = np.argmax(raw_preds, axis=1)
+
+    logits = numpy_2d_softmax(raw_preds)
+    if not(config.model_name is None):
+        model_name_for_logits = config.model_name.split("/")[1]
+    else: 
+        model_name_for_logits = "NoModelNameGiven"
     
+    if not(config.load_model is None):
+        model_name_for_logits = config.load_model.split("experiment-")[1].split("\\")[0]
+    
+    test_results_path = experiments_results_path + "/test_results/"
+    print("\nLogits on the test set saved in: ", test_results_path)
+    os.makedirs(test_results_path, exist_ok=True)    # create the folder(s) if needed
+    np.savetxt(test_results_path + "scal" + "-" + 'logits.txt', logits, delimiter=",", header = "negative,positive", comments = "")
     return Y_test_pred
 
 def generate_submission(Y_preds):
@@ -407,8 +428,8 @@ def run_testing(model):
     return submit_filename
 
 if __name__ == "__main__":
-    wandb.init(project="twitter-sentiment-analysis-scal")
-    #os.environ["WANDB_DISABLED"] = "true"
+    #wandb.init(project="twitter-sentiment-analysis-scal")
+    os.environ["WANDB_DISABLED"] = "true"
     torch.backends.cudnn.benchmark = True
     torch.cuda.empty_cache()    
     torch.autograd.set_detect_anomaly(True)
