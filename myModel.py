@@ -86,8 +86,12 @@ class MyModel(PreTrainedModel):
 		#print(outputs)
 		sequence_output = outputs[0]
 		#print(sequence_output.shape)
-		logits1 = self.classifier(sequence_output[:,0])
-		logits2 = self.classifier(sequence_output[:,0])
+		if(len(sequence_output.shape) == 3):
+			logits1 = self.classifier(sequence_output[:,0])
+			logits2 = self.classifier(sequence_output[:,0])
+		else:
+			logits1 = self.classifier(sequence_output)
+			logits2 = self.classifier(sequence_output)
 	
 
 		logits = 0.5*(logits1+logits2)
