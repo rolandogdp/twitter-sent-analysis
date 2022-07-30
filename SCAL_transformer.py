@@ -208,14 +208,13 @@ def train(model, train_dataset_param, val_dataset_param):
                                     fp16=fp16,
                                     fp16_opt_level='O1',
                                     adam_epsilon=1e-9,
-                                    warmup_ratio=0.05,
+                                    warmup_ratio=0.1,
                                     #optim="adamw_torch",
                                     seed=SEED,
                                     # warmup_steps=500,              # number of warmup steps for learning rate scheduler
                                     weight_decay=weight_decay,       # strength of weight decay
                                     logging_dir='./logs',            # directory for storing logs
-                                    eval_steps = confid.eval_every,          
-                                    logging_steps=config.eval_every*5,
+                                    logging_steps=config.eval_every,
                                     load_best_model_at_end=True,
                                     save_steps=config.eval_every*10,
                                     num_train_epochs=n_epochs,
@@ -241,7 +240,7 @@ def train(model, train_dataset_param, val_dataset_param):
 def load_model_from_checkpoint(selected_checkpoint):
     model_path = selected_checkpoint
     cfg = AutoConfig.from_pretrained(model_path)
-    model = AutoModel.from_pretrained(model_path)
+    model = MyScalModel.from_pretrained(model_path, config = cfg)
     print(f"Loaded model from: {model_path}")
     
     return model
@@ -369,7 +368,6 @@ def run_testing(model):
     return submit_filename
 
 if __name__ == "__main__":
-    torch.backends.cudnn.benchmark = True
     #wandb.init(project="twitter-sentiment-analysis-scal")
     os.environ["WANDB_DISABLED"] = "true"
     torch.cuda.empty_cache()    

@@ -9,6 +9,15 @@ from transformers import DebertaV2ForSequenceClassification
 from transformers import DebertaV2Config
 from transformers import PreTrainedModel
 from transformers.modeling_outputs import SequenceClassifierOutput
+from transformers import PretrainedConfig
+from typing import List
+
+
+class MyScalConfig(PretrainedConfig):
+	model_type = "MyScalModel"
+
+	def __init__(self,**kwargs,):
+		super().__init__(**kwargs)
 
 
 def compute_kl_loss(p, q, pad_mask=None):
@@ -82,7 +91,10 @@ class MyScalModel(PreTrainedModel):
 		model = AutoModel.from_pretrained(model_name, num_labels = num_labels)
 		self.config = model.config
 		#self.config.layer_norm_eps = 1e-6
-		super(MyScalModel, self).__init__(self.config)
+		if config is None:
+			super(MyScalModel, self).__init__(self.config)
+		else:
+			super(MyScalModel, self).__init__(config)
 
 		self.num_labels = num_labels
 		self.model_name = model_name

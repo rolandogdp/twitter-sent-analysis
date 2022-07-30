@@ -23,7 +23,8 @@ class MyScalTrainer(Trainer):
 		#model.to(device)
 		loss = None
 		with torch.no_grad():
-			logitsTrue = model(**inputs).get("logits")
+			logitsTrue = model.predict(**inputs)
+			#print(logitsTrue)
 			if labels is not None:
 				loss_fce = nn.CrossEntropyLoss()
 				loss = loss_fce(logitsTrue.view(-1, 2).to(device), labels.view(-1).to(device)).to(device)

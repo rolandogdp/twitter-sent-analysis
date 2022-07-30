@@ -5,7 +5,7 @@ eval_every: 500
 on_cluster: True
 #Run
 test: True
-load_model: "/cluster/scratch/mezhang/Experiments/experiment-Wed_Jan_28_08h01m56s/checkpoints/iter-0/checkpoint-10000"
+load_model: "/cluster/scratch/mezhang/Experiments/experiment-Fri_Feb__6_16h39m25s/checkpoints/iter-1/checkpoint-100000"
 train: False
 #data
 amount_per_it: 200000
