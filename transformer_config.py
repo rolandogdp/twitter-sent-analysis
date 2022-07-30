@@ -75,7 +75,7 @@ class Configuration(object):
         parser.add_argument('--tokenizer_max_length', type=int, default=256, help='Set the tokenizer max_length parameter.')
 
         # Model
-        parser.add_argument('--model_name', type=str, default="bert-base-cased", help='Default model name to load')     # "cardiffnlp/twitter-roberta-base-sentiment-latest"
+        parser.add_argument('--model_name', type=str, default=None, help='Default model name to load')     # "cardiffnlp/twitter-roberta-base-sentiment-latest"
         
         # Learning args
         parser.add_argument('--train_val_ratio', type=float, default=0.99, help='The training/validation ratio to use for the given dataset')
