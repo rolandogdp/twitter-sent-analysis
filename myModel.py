@@ -67,8 +67,8 @@ class MyModel(PreTrainedModel):
 		#First run of true embedding and predictions
 		if attention_mask is None:
 			attention_mask = torch.ones_like(input_ids)
-		if token_type_ids is None:
-			token_type_ids = torch.zeros_like(input_ids)
+		
+		token_type_ids = torch.zeros_like(input_ids)
 		
 		#with torch.enable_grad():
 		outputs = self.model(
