@@ -50,12 +50,13 @@ from gensim.models import Word2Vec
 from transformers import AutoTokenizer
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.naive_bayes import MultinomialNB
-
+from sklearn.feature_extraction.text import HashingVectorizer
 import matplotlib.pyplot as plt
 
 #TOKENIZER CONSTANTS:
 TOKENIZER_HF_TOKENIZER_128 = 0
 TOKENIZER_SKLEARN_CountVectorizer = 1
+TOKENIZER_SKLEARN_HASHVECTORIZER = 2
 
 
 def load_train_data(amount=-1):
@@ -127,71 +128,13 @@ def preprocess_data(labels,tweets,token_tool=0):
         count_vect = CountVectorizer()
         X_train_counts = count_vect.fit_transform(tweets)
 
-        text_clf = Pipeline([
-     ('vect', CountVectorizer()),
-     ('tfidf', TfidfTransformer()),
-     ('clf', MultinomialNB()),
- ])
+    elif token_tool ==  TOKENIZER_SKLEARN_HASHVECTORIZER:
+        hv = HashingVectorizer()
+        tweets = hv.transform(tweets)
 
 
-    #model = Word2Vec.load_word2vec_format('./glove.twitter.27B.200d.txt', binary=False)
-    # st = nltk.PorterStemmer()
-    # def stemming_on_text(data):
-    #     text = [st.stem(word) for word in data]
-    #     return text
 
-    
-    # def lemmatizer_on_text(data):
-    #     text = [lm.lemmatize(word) for word in data]
-    #     return text
-    
-    
 
-    # def process_text(text):
-    #     '''Takes a string as entry returns a tokenized list'''
-    #     # you will need the glove dataset trained on twitter vocab:
-    #     # https://nlp.stanford.edu/data/glove.twitter.27B.zip
-    #     text = text[0].replace("<user>","user")
-    #     print(text)
-    #     text=word_tokenize(text)
-    #     print(text)
-    #     text_2 = []
-    #     for w in text:
-    #         if w not in stop_words:
-    #             text_2.append(lm.lemmatize(w,"v"))
-    #     print(text_2)
-    #     input()
-        
-    #     return " ".join(text_2)
-
-    # spacy.require_gpu()
-    # nlp = spacy.load("en_core_web_trf")
-    # data_np = np.array((labels,tweets))
-    
-    
-    # data_df = pd.DataFrame({"labels":labels, "tweets":tweets} )
-    # data_df = data_df[data_df['tweets'] != ""]
-    # data_df = data_df[data_df['tweets'] != " "]
-    # print(data_df['labels'].value_counts())
-
-    # tokenizer = RegexpTokenizer(r'w+')
-    # data_df['tweets'] = data_df['tweets'].apply(tokenizer.tokenize)
-    # data_df['tweets'].head()
-    
-
-    #tweets = parallel_apply_along_axis(process_text, 1, tweets)#, *args, **kwargs)
-    #tweets = np.apply_along_axis(process_text, 1, tweets)
-    
-    
-    
-
-    
-
-    # data_df['tweets']= data_df['tweets'].apply(lambda x: stemming_on_text(x))
-    # data_df['tweets'].head()
-
-    # data_df['tweets'] = data_df['tweets'].apply(lambda x: lemmatizer_on_text(x))
-    # data_df['tweets'].head()
 
     
 
@@ -256,9 +199,9 @@ def dl_wordlists():
 def main():
     # dl_wordlists()
     # check_libs()
-    tweets, labels = load_train_data(400000)
+    tweets, labels = load_train_data(100000)
 
-    X_train,X_test,y_train, y_test = preprocess_data(labels,tweets)
+    X_train,X_test,y_train, y_test = preprocess_data(labels,tweets,TOKENIZER_SKLEARN_HASHVECTORIZER)
     del(labels)
     del(tweets)
 
