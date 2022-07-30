@@ -80,18 +80,15 @@ class MyModel(PreTrainedModel):
             inputs_embeds=inputs_embeds,
             output_attentions=output_attentions,
             output_hidden_states=output_hidden_states,
-            return_dict=return_dict,
+            return_dict=True,
 		)
 		#print(self.model.modules)
 		#print(outputs)
 		sequence_output = outputs[0]
 		#print(sequence_output.shape)
-		if(len(sequence_output.shape) == 3):
-			logits1 = self.classifier(sequence_output[:,0])
-			logits2 = self.classifier(sequence_output[:,0])
-		else:
-			logits1 = self.classifier(sequence_output)
-			logits2 = self.classifier(sequence_output)
+		logits1 = self.classifier(sequence_output[:,0])
+		logits2 = self.classifier(sequence_output[:,0])
+	
 
 		logits = 0.5*(logits1+logits2)
 		loss = torch.tensor(0.0)
