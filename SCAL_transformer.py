@@ -44,6 +44,7 @@ metric = load_metric("accuracy")    # metric to use
 train_dataset, val_dataset = None, None
 lr = 0.0
 curr_iter = 0
+val_dataset_global = None
 
 def preprocess(text):
     new_text = []
@@ -97,8 +98,18 @@ def read_file(file_name_label_tuple, starting_line=0, end_line=0):
 
     return(tweets, labels)
 
+def read_file_HF(file_name, starting_line=0, end_line=0):
+    tweets, labels = [], []
+    with open( file_name, 'r', encoding='utf-8') as f:
+        tweets = [line.split("\t",maxsplit=1) for line in f.readlines()[starting_line:end_line]]
+        tweets = np.array(tweets)
+        labels = tweets[:,0].astype(np.uint8)
+        tweets = tweets[:,1]
+        
+    return(tweets, labels)
+
 def load_train_data(amount_per_batch, iteration):
- 
+    '''
     if use_full_dataset == True:
         X_train_neg_path = project_path + "train_neg_full.txt"
         X_train_pos_path = project_path + "train_pos_full.txt"
@@ -123,6 +134,16 @@ def load_train_data(amount_per_batch, iteration):
     print(f"Loaded {len(tweets)} tweets!")
     
     return np.array(tweets), np.array(labels)
+    '''
+    starting_line = iteration * amount_per_batch
+    end_line = starting_line + amount_per_batch
+    print(f"Going to read {amount_per_batch*2} lines ({amount_per_batch} in each of the pos and neg datasets), starting_line:{starting_line}, end_line:{end_line}")
+    tweets, labels = read_file_HF(project_path + "HF_data.txt", starting_line, end_line)
+    print(f"Loaded {len(tweets)} tweets!")
+
+
+    return tweets, labels
+
 
 def load_test_data():
     filename = project_path + "test_data.txt"
@@ -145,39 +166,57 @@ def vectorize_data(tweets,train_indices,val_indices):
     return X_train, X_val
 
 def get_train_val_data(tweets, labels):
-    nb_of_samples = len(tweets)
-    shuffled_indices = np.random.permutation(nb_of_samples)
-    split_idx = int(train_val_ratio * nb_of_samples)
+    global val_dataset_global
+    if val_dataset_global is None:
+        nb_of_samples = len(tweets)
+        shuffled_indices = np.random.permutation(nb_of_samples)
+        split_idx = int(train_val_ratio * nb_of_samples)
 
-    train_indices = shuffled_indices[:split_idx]
-    val_indices = shuffled_indices[split_idx:]
+        train_indices = shuffled_indices[:split_idx]
+        val_indices = shuffled_indices[split_idx:]
 
-    print("Number of indices for training: ", len(train_indices))
-    print("Number of indices for validation: ", len(val_indices))
+        print("Number of indices for training: ", len(train_indices))
+        print("Number of indices for validation: ", len(val_indices))
 
-    if use_most_freq_words:
-        X_train, X_val = vectorize_data(tweets, train_indices, val_indices)
+        if use_most_freq_words:
+            X_train, X_val = vectorize_data(tweets, train_indices, val_indices)
+        else:
+            X_train, X_val = tweets[train_indices], tweets[val_indices]
+        
+        Y_train = labels[train_indices]
+        Y_val = labels[val_indices]
+        
+        X_train = tokenizer(X_train.tolist(), max_length=128, padding="max_length", truncation=True)
+        X_val = tokenizer(X_val.tolist(), max_length=128, padding="max_length", truncation=True)
+
+        Y_train = torch.tensor(Y_train).clone().detach()
+        Y_val = torch.tensor(Y_val).clone().detach()
+
+        train_dataset = TrainDataset(X_train, Y_train)
+        val_dataset = TrainDataset(X_val, Y_val)
+        val_dataset_global = val_dataset
+        
+        return train_dataset, val_dataset
     else:
-        X_train, X_val = tweets[train_indices], tweets[val_indices]
-    
-    Y_train = labels[train_indices]
-    Y_val = labels[val_indices]
-    
-    X_train_list = X_train.tolist()
-    X_val_list = X_val.tolist()
-    X_train_list = preprocess_texts(X_train_list)
-    X_val_list = preprocess_texts(X_val_list)
+        nb_of_samples = len(tweets)
+        shuffled_indices = np.random.permutation(nb_of_samples)
+        
+        train_indices = shuffled_indices
+        print("Number of indices for training: ", len(train_indices))
 
-    X_train = tokenizer(X_train_list, max_length=128, padding="max_length", truncation=True)
-    X_val = tokenizer(X_val_list, max_length=128, padding="max_length", truncation=True)
+        if use_most_freq_words:
+            X_train = vectorize_data(tweets, train_indices, val_indices)
+        else:
+            X_train = tweets[train_indices]
+        
+        Y_train = labels[train_indices]
+        
+        X_train = tokenizer(X_train.tolist(), max_length=128, padding="max_length", truncation=True)
 
-    Y_train = torch.tensor(Y_train).clone().detach()
-    Y_val = torch.tensor(Y_val).clone().detach()
-
-    train_dataset = TrainDataset(X_train, Y_train)
-    val_dataset = TrainDataset(X_val, Y_val)
-    
-    return train_dataset, val_dataset
+        Y_train = torch.tensor(Y_train).clone().detach()
+        train_dataset = TrainDataset(X_train, Y_train)
+        
+        return train_dataset,val_dataset_global
 
 def get_test_data(tweets):
     nb_of_samples = len(tweets)
@@ -221,7 +260,7 @@ def train(model, train_dataset_param, val_dataset_param):
                                     metric_for_best_model = "eval_loss",
                                     greater_is_better = False,
                                     #wandb
-                                    #report_to='wandb'
+                                    report_to='wandb'
                                     )
     
     if not (train_dataset_param is None) and not (val_dataset_param is None):
@@ -368,8 +407,9 @@ def run_testing(model):
     return submit_filename
 
 if __name__ == "__main__":
-    #wandb.init(project="twitter-sentiment-analysis-scal")
-    os.environ["WANDB_DISABLED"] = "true"
+    wandb.init(project="twitter-sentiment-analysis-scal")
+    #os.environ["WANDB_DISABLED"] = "true"
+    torch.backends.cudnn.benchmark = True
     torch.cuda.empty_cache()    
     torch.autograd.set_detect_anomaly(True)
     # To time the duration of the experiment

@@ -8,13 +8,13 @@ test: True
 load_model: "/cluster/scratch/mezhang/Experiments/experiment-Fri_Feb__6_16h39m25s/checkpoints/iter-1/checkpoint-100000"
 train: True
 #data
-amount_per_it: 500000
-amount_of_data: 500000
+amount_per_it: 1000000
+amount_of_data: 1000000
 #Model
 model_name: "microsoft/deberta-v3-base"
 full_data: True
 #learning args
-train_val_ratio: 0.95
+train_val_ratio: 0.98
 lr: 0.00002
 n_epochs: 1
 weight_decay: 0.
@@ -23,4 +23,4 @@ bs_eval: 16
 fp16: False
 epsilon: 0.01
 alpha: 0.1
-beta: 1.0
+beta: 0.5
