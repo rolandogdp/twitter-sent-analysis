@@ -4,6 +4,8 @@
 import os
 import sys
 
+import json
+
 import torch
 import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
@@ -256,7 +258,7 @@ def train(model, train_dataset, val_dataset, iteration):
     if len(os.listdir(checkpoints_path)) == 0:
         trainer.train()
     else: 
-        trainer.train(resume_from_checkpoint=True)
+        trainer.train(checkpoints_path, resume_from_checkpoint=True)    # ??? Working like that?
 
     best_model_at_iteration_path = f"/best_model/iteration{iteration}"
     trainer.save_model(experiments_results_path + best_model_at_iteration_path)    # save the best model of the current iteration
@@ -269,12 +271,36 @@ def load_model_from_checkpoint(path_to_checkpoint):
     
     return model
 
-    
+
+def numpy_2d_softmax(model_preds):
+    max = np.max(model_preds, axis=1, keepdims=True)
+    e_x = np.exp(model_preds-max)
+    sum = np.sum(e_x, axis=1, keepdims=True)
+    out = e_x / sum 
+    return out
+
 def test(model):
+
     test_trainer = Trainer(model)
     tweets = get_test_data(load_test_data())
     raw_preds, _, _ = test_trainer.predict(tweets)     # only predictions to return, no label ids, no metrics; see HF Trainer doc
     Y_test_pred = np.argmax(raw_preds, axis=1)
+
+    # store the logits in a file
+    # print(raw_preds)
+    logits = numpy_2d_softmax(raw_preds)    # beer owning line
+    print(len(logits))
+    print(logits)
+
+    if not(config.model_name is None):
+        model_name_for_logits = config.model_name.split("/")[1]
+    else: 
+        model_name_for_logits = "NoModelNameGiven"
+    
+    if not(config.load_model is None):
+        model_name_for_logits = config.load_model.split("experiment-")[1].split("\\")[0]
+    
+    np.savetxt(test_results_path + model_name_for_logits + "-" + 'logits.txt', logits, delimiter=",", header = "negative,positive", comments = "") # fmt="%1d"
     
     return Y_test_pred
 
@@ -285,9 +311,6 @@ def generate_submission(Y_preds):
     results[:,0] = np.arange(1, nb_of_samples+1).astype(np.int32)  # save the ids
     results[:,1] = [-1 if elem == 0 else 1 for elem in Y_preds]  # save the test predictions
 
-    test_results_path = experiments_results_path + "/test_results/"
-    print("\nPredictions on the test set saved in: ", test_results_path)
-    os.makedirs(test_results_path, exist_ok=True)    # create the folder(s) if needed
     final_filename = f"{experiment_date_for_folder_name}-submission.csv"
     np.savetxt(test_results_path + final_filename, results, fmt="%1d", delimiter=",", header = "Id,Prediction", comments = "")
     
@@ -443,6 +466,10 @@ if __name__ == "__main__":
     print("The experiment path is: ", experiment_path)
     print("The model checkpoints will be saved at: ", checkpoints_path, "\n")
 
+    # for the submission
+    test_results_path = experiments_results_path + "/test_results/"
+    os.makedirs(test_results_path, exist_ok=True)    # create the folder(s) if needed
+
 
     # Fix seeds for reproducibility
     SEED = config.seed
@@ -486,6 +513,10 @@ if __name__ == "__main__":
     print(f"We will use {total_amount_of_tweets} tweets in total. {int(train_val_ratio * total_amount_of_tweets)} for training and {int(total_amount_of_tweets * (1-train_val_ratio))} for validation.")
     print(f"{amount_per_it} tweets will be used for each of the {number_of_iterations} subset iterations (i.e., in each subset that is split in training/validation).")
 
+    # Misc
+    submit_to_kaggle = config.autosubmit
+    discord_enabled = config.discord
+
     # Model
     n_epochs = config.n_epochs
     bs_train = config.bs_train
@@ -495,16 +526,18 @@ if __name__ == "__main__":
     weight_decay = config.weight_decay
     tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True)
 
-
-    # Misc
-    submit_to_kaggle = config.autosubmit
-    discord_enabled = config.discord
-
     # Create the model
     model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=config.num_labels, local_files_only=False, ignore_mismatched_sizes=True)
     
-        # If we need to load a model from a checkpoint or not
+    # If we need to load a model from a checkpoint or not
     if not (config.load_model is None):
+        with open(experiment_path + config.load_model + "/config.json", 'r') as json_file:
+            json_dict = json.load(json_file)
+        
+        model_name = json_dict["_name_or_path"]
+        print("Using a checkpoint from the model architecture: ", model_name)
+
+        tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True)
         model = load_model_from_checkpoint(config.load_model)   # load_model should be (from a previous exp) e.g.: experiment-Thu_Jul_28_03h29m56s/checkpoints/checkpoint-14500
 
     model.to(C.DEVICE)  # automatic if use the Trainer()
