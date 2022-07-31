@@ -15,6 +15,7 @@ import random
 
 from sklearn.feature_extraction.text import CountVectorizer
 from transformers import AutoTokenizer
+from transformers import AutoConfig
 from transformers import AutoModelForSequenceClassification
 from transformers import TrainingArguments     # https://huggingface.co/transformers/v3.0.2/main_classes/trainer.html#transformers.TFTrainingArguments
 from transformers import Trainer    # https://huggingface.co/transformers/v3.0.2/main_classes/trainer
@@ -266,7 +267,8 @@ def train(model, train_dataset, val_dataset, iteration):
 
 def load_model_from_checkpoint(path_to_checkpoint):
     full_path_to_model_checkpoint = experiment_path + path_to_checkpoint
-    model = AutoModelForSequenceClassification.from_pretrained(full_path_to_model_checkpoint, num_labels=config.num_labels, local_files_only=False, ignore_mismatched_sizes=True)
+    cfg = AutoConfig.from_pretrained(full_path_to_model_checkpoint)
+    model = MyModel.from_pretrained(full_path_to_model_checkpoint, config = cfg)
     print(f"Loaded model from: {full_path_to_model_checkpoint}")
     
     return model
