@@ -46,6 +46,7 @@ lr = 0.0
 curr_iter = 0
 val_dataset_global = None
 
+#standard script for starting training and testing, parsing arguments. Preprocessing is added
 def preprocess(text):
     new_text = []
     for t in text.split(" "):
@@ -109,32 +110,6 @@ def read_file_HF(file_name, starting_line=0, end_line=0):
     return(tweets, labels)
 
 def load_train_data(amount_per_batch, iteration):
-    '''
-    if use_full_dataset == True:
-        X_train_neg_path = project_path + "train_neg_full.txt"
-        X_train_pos_path = project_path + "train_pos_full.txt"
-        
-    else:
-        X_train_neg_path = project_path + "train_neg.txt"
-        X_train_pos_path = project_path + "train_pos.txt"
-
-    amount_per_batch = amount_per_batch // 2
-    
-    starting_line = iteration * amount_per_batch
-    end_line = starting_line + amount_per_batch
-    print(f"Going to read {amount_per_batch*2} lines ({amount_per_batch} in each of the pos and neg datasets), starting_line:{starting_line}, end_line:{end_line}")
-    tweets, labels = read_file((X_train_neg_path, 0), starting_line=starting_line, end_line=end_line)
-    tweets_2, labels_2 = read_file((X_train_pos_path, 1), starting_line=starting_line, end_line=end_line)
-    tweets += tweets_2
-    tweets_2 = []
-    del(tweets_2)
-    labels += labels_2
-    labels_2 = []
-    del(labels_2)
-    print(f"Loaded {len(tweets)} tweets!")
-    
-    return np.array(tweets), np.array(labels)
-    '''
     starting_line = iteration * amount_per_batch
     end_line = starting_line + amount_per_batch
     print(f"Going to read {amount_per_batch*2} lines ({amount_per_batch} in each of the pos and neg datasets), starting_line:{starting_line}, end_line:{end_line}")
@@ -522,7 +497,7 @@ if __name__ == "__main__":
     # Create the model
     #if model is None:
     #    model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=config.num_labels, local_files_only=False, ignore_mismatched_sizes=True)
-    if model is None:
+    if model is None: #load CA-KL Model isntead
         model = MyScalModel(model_name = model_name, num_labels=config.num_labels, epsilon=config.epsilon, alpha = config.alpha,
                         beta = config.beta)
     model.to(C.DEVICE)  # automatic if use the Trainer()

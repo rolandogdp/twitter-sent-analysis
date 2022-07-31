@@ -9,7 +9,7 @@ load_model: None
 train: True
 #data
 amount_per_it: 1250000
-amount_of_data: 2500000
+amount_of_data: 2270482
 #Model
 model_name: "microsoft/deberta-v3-base"
 full_data: True

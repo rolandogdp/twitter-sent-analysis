@@ -91,7 +91,7 @@ def load_train_data():
         X_train_pos_path = PROJECT_PATH + "train_pos.txt"
     
     tweets, labels = read_file((X_train_neg_path, 0))
-    tweets = list(set(tweets))
+    tweets = list(set(tweets)) #remove duplicates by set property
     labels = labels[:len(tweets)]
     print("There are ", len(tweets), " negative tweets after removing the duplicates.")
     

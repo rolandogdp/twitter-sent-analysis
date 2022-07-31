@@ -8,7 +8,7 @@ from transformers import Trainer
 class MyScalTrainer(Trainer):
 
 
-	def compute_loss(self, model, inputs, return_outputs=False): #use R-Drop
+	def compute_loss(self, model, inputs, return_outputs=False):
 		outputs = model(**inputs, return_dict = True)
 		loss = outputs.get("loss")
 		return (loss, outputs) if return_outputs else loss
