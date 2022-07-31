@@ -1,1 +1,2 @@
-Add name of the csv file, and its voting weight to the file "votingModel.csv". Then "python votingScript.py"
+Add name of the csv file, and its voting weight to the file "votingModel.csv". <br>
+Then run "python votingScript.py"
