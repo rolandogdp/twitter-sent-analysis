@@ -24,6 +24,8 @@ def _define_columns(example):
     return {"text": text_splited[1].strip(), "labels": int(text_splited[0])}
 
 class Sentiment(datasets.GeneratorBasedBuilder):
+    '''Custom Dataset created using the HuggingFace api so we can 
+    use all of their's api on the dataset'''
     def _info(self):
         class_names = ["negative", "positive"]
         return datasets.DatasetInfo(
