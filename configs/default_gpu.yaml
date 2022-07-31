@@ -5,11 +5,11 @@ eval_every: 2000
 on_cluster: True
 #Run
 test: True
-load_model: "/cluster/scratch/mezhang/Experiments/experiment-Fri_Feb__6_16h39m25s/checkpoints/iter-1/checkpoint-100000"
+load_model: None
 train: True
 #data
-amount_per_it: 1000000
-amount_of_data: 1000000
+amount_per_it: 1250000
+amount_of_data: 2500000
 #Model
 model_name: "microsoft/deberta-v3-base"
 full_data: True
