@@ -14,7 +14,6 @@
 *.csv
 *.ipynb
 *.pkl
-*.sh
 *.jsonl
 *.txt
 

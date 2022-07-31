@@ -1,0 +1,1 @@
+bsub -n 4 -W 40:00 -o execution_output -R "rusage[mem=8192, ngpus_excl_p=1]" python3 HF_transformer.py --train --test --amount_per_it 1 --amount_of_data 1 --model_name vinai/bertweet-base --on_cluster --full_data --bs_train 32 --bs_eval 16  --fp16 --train_val_ratio 0.995 --tokenizer_max_length 128 --discord --lr 2e-5 --autosubmit --use_HF_dataset_format
