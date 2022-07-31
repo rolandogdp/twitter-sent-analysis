@@ -30,6 +30,12 @@ There are 3 main branches for the final project:
 - bertTweetCustom: You will need to switch to this branch, check that you still have the correct HF_data.txt file. You will be able to run this model in the same way as master. For example:
 >  python HF_transformer.py --tag "Test Transformer" --on_cluster --train --test --amount_per_it 50000 --amount_of_data 2000000 --full_data --bs_train 32 --bs_eval 16 --n_epochs 3
 
+### Best Model command
+To reproduce the best run we had, you will need to run this:
+> HF_transformer.py --tag "Test BERTTweet" --on_cluster --train --test --n_epochs 3 --lr 1e-5 --fp16 --model_name vinai/bertweet-base --bs_train 32 --bs_eval 32 --tokenizer_max_length 128
+
+It would be advised to run it on the cluster as it can take quite a lot of time... If you run it on the cluster you should set the correct environment variables, if not, please remove the "--on_cluster" parameter.
+
 ### HF_transformer.py Usage
 >>
 >usage: HF_transformer.py [-h] [--tag TAG] [--seed SEED] [--on_cluster] [--autosubmit] [--discord] [--load_model LOAD_MODEL] [--test] [--train]
