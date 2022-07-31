@@ -37,7 +37,11 @@ class MyModel(PreTrainedModel):
 	def __init__(self, model_name = "vinai/bertweet-base" , config = None):
 		model = AutoModel.from_pretrained(model_name, num_labels = 2)
 		#self.config.layer_norm_eps = 1e-6
-		super(MyModel, self).__init__(model.config)
+		if config is None:
+			super(MyModel, self).__init__(model.config)
+		else:
+			super(MyModel, self).__init__(config)
+
 		self.config = model.config
 		self.model = model;
 		self.features_dim = self.config.hidden_size

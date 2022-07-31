@@ -20,6 +20,8 @@ from transformers import AutoModelForSequenceClassification
 from transformers import TrainingArguments     # https://huggingface.co/transformers/v3.0.2/main_classes/trainer.html#transformers.TFTrainingArguments
 from transformers import Trainer    # https://huggingface.co/transformers/v3.0.2/main_classes/trainer
 from transformers import DataCollatorForLanguageModeling
+from transformers import RobertaConfig
+from transformers import BertConfig
 from myModel import MyModel
 from transformers import pipeline
 from datasets import load_metric
@@ -45,6 +47,38 @@ orange = 15105570
 # Global variables
 METRIC = load_metric("accuracy")    # metric to use
 val_dataset_global = None
+
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import numpy as np
+import random
+from transformers import Trainer
+
+class MyTrainer(Trainer):
+    
+    def prediction_step(self, model, inputs, prediction_loss_only, ignore_keys = None):
+        labels = inputs.get("labels")
+        device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        if labels is not None:
+            labels.to(device)
+        #model.to(device)
+        loss = None
+        with torch.no_grad():
+            inputs_new = {}
+            for inp in inputs:
+                # inp.to(device)
+                inputs_new[inp] = inputs[inp].to(device)
+
+            logitsTrue = model(**inputs_new).get("logits")
+
+            #print(logitsTrue)
+            if labels is not None:
+                loss_fce = nn.CrossEntropyLoss()
+                loss = loss_fce(logitsTrue.view(-1, 2).to(device), labels.view(-1).to(device)).to(device)
+                loss = loss.mean().detach()
+
+        return (loss, logitsTrue, labels)
 
 # DATASET CLASSES
 class TrainDataset(Dataset):
@@ -173,8 +207,8 @@ def get_train_val_data(tweets, labels):
         Y_train = labels[train_indices]
         Y_val = labels[val_indices]
         
-        X_train = tokenizer(X_train.tolist(), max_length=config.tokenizer_max_length, padding="max_length", truncation=True)
-        X_val = tokenizer(X_val.tolist(), max_length=config.tokenizer_max_length, padding="max_length", truncation=True)
+        X_train = tokenizer(X_train.tolist(), max_length=config.tokenizer_max_length, padding="max_length", truncation=True, return_tensors = 'pt')
+        X_val = tokenizer(X_val.tolist(), max_length=config.tokenizer_max_length, padding="max_length", truncation=True, return_tensors = 'pt')
 
         Y_train = torch.tensor(Y_train).clone().detach()
         Y_val = torch.tensor(Y_val).clone().detach()
@@ -198,7 +232,8 @@ def get_train_val_data(tweets, labels):
         
         Y_train = labels[train_indices]
         
-        X_train = tokenizer(X_train.tolist(), max_length=config.tokenizer_max_length, padding="max_length", truncation=True)
+        X_train = tokenizer(X_train.tolist(), max_length=config.tokenizer_max_length, padding="max_length", truncation=True, return_tensors = 'pt')
+
 
         Y_train = torch.tensor(Y_train).clone().detach()
         train_dataset = TrainDataset(X_train, Y_train)
@@ -208,7 +243,7 @@ def get_train_val_data(tweets, labels):
 def get_test_data(tweets):
     nb_of_samples = len(tweets)
     print(f'{nb_of_samples} tweets loaded for testing.\n')
-    tweets = tokenizer(tweets, max_length=config.tokenizer_max_length, padding="max_length", truncation=True)
+    tweets = tokenizer(tweets, max_length=config.tokenizer_max_length, padding="max_length", truncation=True, return_tensors = 'pt')
     tweets = TestDataset(tweets)
 
     return tweets
@@ -267,8 +302,12 @@ def train(model, train_dataset, val_dataset, iteration):
 
 def load_model_from_checkpoint(path_to_checkpoint):
     full_path_to_model_checkpoint = experiment_path + path_to_checkpoint
+
     cfg = AutoConfig.from_pretrained(full_path_to_model_checkpoint)
-    model = MyModel.from_pretrained(full_path_to_model_checkpoint, config = cfg)
+    # model = MyModel.from_pretrained(full_path_to_model_checkpoint, config = cfg)
+    model = MyModel()
+    # model.load_state_dict(torch.load(full_path_to_model_checkpoint + '/pytorch_model.bin', map_location=torch.device('cpu')))
+    model.load_state_dict(torch.load(full_path_to_model_checkpoint + '/pytorch_model.bin'))
     print(f"Loaded model from: {full_path_to_model_checkpoint}")
     
     return model
@@ -283,7 +322,7 @@ def numpy_2d_softmax(model_preds):
 
 def test(model):
 
-    test_trainer = Trainer(model)
+    test_trainer = MyTrainer(model)
     tweets = get_test_data(load_test_data())
     raw_preds, _, _ = test_trainer.predict(tweets)     # only predictions to return, no label ids, no metrics; see HF Trainer doc
     Y_test_pred = np.argmax(raw_preds, axis=1)
@@ -302,7 +341,7 @@ def test(model):
     if not(config.load_model is None):
         model_name_for_logits = config.load_model.split("experiment-")[1].split("\\")[0]
     
-    np.savetxt(test_results_path + model_name_for_logits + "-" + 'logits.txt', logits, delimiter=",", header = "negative,positive", comments = "") # fmt="%1d"
+    np.savetxt("./" + 'logits.txt', logits, delimiter=",", header = "negative,positive", comments = "") # fmt="%1d"
     
     return Y_test_pred
 
@@ -331,7 +370,7 @@ def load_and_train(model, amount_per_batch, iteration):
         datasets = load_dataset("./HF_dataset.py")
 
         def tokenization(sample):
-            return tokenizer(sample["text"], max_length=config.tokenizer_max_length, padding="max_length", truncation=True)
+            return tokenizer(sample["text"], max_length=config.tokenizer_max_length, padding="max_length", truncation=True, return_tensors = 'pt')
 
         datasets = datasets.map(tokenization, batched=True)
 
@@ -537,7 +576,8 @@ if __name__ == "__main__":
         with open(experiment_path + config.load_model + "/config.json", 'r') as json_file:
             json_dict = json.load(json_file)
         
-        model_name = json_dict["_name_or_path"]
+        # model_name = json_dict["_name_or_path"]
+        model_name = config.model_name
         print("Using a checkpoint from the model architecture: ", model_name)
 
         tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True)
