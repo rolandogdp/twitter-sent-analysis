@@ -32,7 +32,7 @@ There are 3 main branches for the final project:
 
 ### Best Model command
 To reproduce the best run we had, you will need to run this:
-> HF_transformer.py --tag "Test BERTTweet" --on_cluster --train --test --n_epochs 3 --lr 1e-5 --fp16 --model_name vinai/bertweet-base --bs_train 32 --bs_eval 32 --tokenizer_max_length 128
+> python HF_transformer.py --tag "Test BERTTweet" --on_cluster --train --test --n_epochs 3 --lr 1e-5 --fp16 --model_name vinai/bertweet-base --bs_train 32 --bs_eval 32 --tokenizer_max_length 128
 
 It would be advised to run it on the cluster as it can take quite a lot of time... If you run it on the cluster you should set the correct environment variables, if not, please remove the "--on_cluster" parameter.
 
