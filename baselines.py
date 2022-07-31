@@ -17,11 +17,12 @@ from nltk.stem import WordNetLemmatizer
 from sklearn.svm import LinearSVC
 from sklearn.naive_bayes import BernoulliNB
 from sklearn.linear_model import LogisticRegression
+from sklearn import svm
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import confusion_matrix, classification_report
 import seaborn as sns
-
+from sklearn.ensemble import RandomForestClassifier
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -45,7 +46,10 @@ from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
 
 from nltk.stem.wordnet import WordNetLemmatizer
-from gensim.models import Word2Vec
+import gensim
+
+import xgboost as xgb
+
 # from wordcloud import WordCloud
 from transformers import AutoTokenizer
 from sklearn.feature_extraction.text import CountVectorizer
@@ -53,10 +57,65 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.feature_extraction.text import HashingVectorizer
 import matplotlib.pyplot as plt
 
+
+
+from gensim.models import KeyedVectors
+from gensim.scripts.glove2word2vec import glove2word2vec
+
+
+
+
 #TOKENIZER CONSTANTS:
 TOKENIZER_HF_TOKENIZER_128 = 0
 TOKENIZER_SKLEARN_CountVectorizer = 1
 TOKENIZER_SKLEARN_HASHVECTORIZER = 2
+TOKENIZER_SKLEARN_TFID_VECT = 3
+TOKENIZER_GENSIM_WORD2VEC = 4
+
+
+
+class Word2VecVectorizer:
+  def init(self, model):
+    print("Loading in word vectors...")
+    self.word_vectors = model
+    print("Finished loading in word vectors")
+
+  def fit(self, data):
+    pass
+
+  def transform(self, data):
+    # determine the dimensionality of vectors
+    v = self.word_vectors.get_vector('king')
+    self.D = v.shape[0]
+
+    X = np.zeros((len(data), self.D))
+    n = 0
+    emptycount = 0
+    for sentence in data:
+      tokens = sentence.split()
+      vecs = []
+      m = 0
+      for word in tokens:
+        try:
+          # throws KeyError if word not found
+          vec = self.word_vectors.get_vector(word)
+          vecs.append(vec)
+          m += 1
+        except KeyError:
+          pass
+      if len(vecs) > 0:
+        vecs = np.array(vecs)
+        X[n] = vecs.mean(axis=0)
+      else:
+        emptycount += 1
+      n += 1
+    print("Numer of samples with no words found: %s / %s" % (emptycount, len(data)))
+    return X
+
+
+  def fit_transform(self, data):
+    self.fit(data)
+    return self.transform(data)
 
 
 def load_train_data(amount=-1):
@@ -119,54 +178,57 @@ def preprocess_data(labels,tweets,token_tool=0):
     
     # lm = nltk.WordNetLemmatizer()
     # stop_words=set(stopwords.words("english"))
+    # print("Tweet before processing:",tweets[0])
+
+    should_split = True
 
     if token_tool == 0 :
         tokenizer = AutoTokenizer.from_pretrained("vinai/bertweet-base", use_fast=True)
-        tweets = tokenizer(tweets.tolist(), max_length=128, padding="max_length")
-        tweets = np.array(tweets["input_ids"])
+        tweets_out = tokenizer(tweets.tolist(), max_length=128, padding="max_length")
+        tweets_out = np.array(tweets_out["input_ids"])
     elif token_tool == TOKENIZER_SKLEARN_CountVectorizer:
         count_vect = CountVectorizer()
-        X_train_counts = count_vect.fit_transform(tweets)
+        tweets_out = count_vect.fit_transform(tweets)
 
     elif token_tool ==  TOKENIZER_SKLEARN_HASHVECTORIZER:
         hv = HashingVectorizer()
-        tweets = hv.transform(tweets)
+        tweets_out = hv.transform(tweets)
+    elif token_tool == TOKENIZER_SKLEARN_TFID_VECT:
+
+        vectoriser = TfidfVectorizer(
+        ngram_range=(1, 2),
+        max_df=0.75,
+        min_df=3,
+        strip_accents="unicode",
+        sublinear_tf=True)
+        tweets_out = vectoriser.fit_transform(tweets)
+        #print('No. of feature_words: ', len(vectoriser.get_feature_names()))
+    elif token_tool == TOKENIZER_GENSIM_WORD2VEC:
+
+        #glove_input_file = glove_filename
+        word2vec_output_file = "./glove.twitter.27B.200d.word2vec"
 
 
+        model = KeyedVectors.load_word2vec_format(word2vec_output_file, binary=False)
 
+        # Set a word vectorizer
+        vectorizer = Word2VecVectorizer(model)
+        # Get the sentence embeddings for the train dataset
+        X_train, X_test, y_train, y_test = train_test_split(tweets,labels,test_size = 0.005, random_state = 12345)
+        should_split = False
+        X_train = vectorizer.fit_transform(X_train)
+        
+        # Get the sentence embeddings for the test dataset
+        X_test = vectorizer.transform(X_test)
 
-
+                
+    # print("Tweet processed:",tweets[0,:])
     
 
-    # print(data_df)
+    # input()
+    if should_split:
+        X_train, X_test, y_train, y_test = train_test_split(tweets_out,labels,test_size = 0.005, random_state = 12345)
 
-    # plot word groups 4 pos
-    # data_pos = data_df['tweets'][800000:]
-    # print(data_pos)
-    # plt.figure(figsize = (20,20))
-    # wc = WordCloud(max_words = 1000 , width = 1600 , height = 800, collocations=False).generate(" ".join(data_pos))
-    # plt.imshow(wc,title="Positive words")
-
-    # data_neg = data_df['tweets'][:800000]
-    # plt.figure(figsize = (20,20))
-    # wc = WordCloud(max_words = 1000 , width = 1600 , height = 800,
-    #             collocations=False).generate(" ".join(data_neg))
-    # plt.imshow(wc,title="Negative words")
-
-    
-    
-    # print(f"HEEERE:{X.head()}")
-    
-    X_train, X_test, y_train, y_test = train_test_split(tweets,labels,test_size = 0.005, random_state = 12345)
-
-    # vectoriser = TfidfVectorizer(ngram_range=(1,2), max_features=500000)
-    # vectoriser.fit(X_train)
-    # print('No. of feature_words: ', len(vectoriser.get_feature_names()))
-
-    # X_train = vectoriser.transform(X_train)
-    # X_test  = vectoriser.transform(X_test)
-
-    # train_clean_df, test_clean_df = train_test_split(data_df, test_size=0.15)
     return X_train,X_test,y_train, y_test
 
 def plot_roc_auc(y_test,y_pred,name="Default"):
@@ -188,34 +250,51 @@ def dl_wordlists():
     import nltk
     nltk.download('stopwords')
 
-
-
-
-
-
-
-
+def gen_word2vec_file():
+    word2vec_output_file = "./glove.twitter.27B.200d.word2vec"
+    glove2word2vec("./glove.twitter.27B.200d.txt", word2vec_output_file)
 
 def main():
     # dl_wordlists()
     # check_libs()
-    tweets, labels = load_train_data(100000)
+    # gen_word2vec_file()
+    tweets, labels = load_train_data(500000)
+    preprocessing_methods = ["TOKENIZER_HF_TOKENIZER_128" ,"TOKENIZER_SKLEARN_CountVectorizer" ,"TOKENIZER_SKLEARN_HASHVECTORIZER" ,"TOKENIZER_SKLEARN_TFID_VECT" ,"TOKENIZER_GENSIM_WORD2VEC" ]
+    should_skip_method = [False,True,False,False,True]
+    for i,method_name in enumerate(preprocessing_methods):
+        if should_skip_method[i]:
+            continue
+        print(f"Currently trying preprocessing method: {method_name}")
+        X_train,X_test,y_train, y_test = preprocess_data(labels,tweets,i)
+    # del(labels)
+    # del(tweets)
 
-    X_train,X_test,y_train, y_test = preprocess_data(labels,tweets,TOKENIZER_SKLEARN_HASHVECTORIZER)
-    del(labels)
-    del(tweets)
 
-    BNBmodel = BernoulliNB()
-    SVCmodel = LinearSVC()
-    LRmodel = LogisticRegression(C = 2, max_iter = 1000, n_jobs=-1)
+        BNBmodel = BernoulliNB()
+        SVCmodel = LinearSVC()
+        LRmodel = LogisticRegression(C = 2, max_iter = 1000, n_jobs=-1)
+        NUSVCmodel = svm.NuSVC(gamma="auto")
+        RandomForestClassifiermodel = RandomForestClassifier(n_estimators=200, max_depth=10)
+        # BiLSTM_SentimentAnalysismodel = BiLSTM_SentimentAnalysis()
 
-    model_fit(BNBmodel,X_train,X_test,y_train, y_test,name="BernoulliNB")
-    model_fit(SVCmodel,X_train,X_test,y_train, y_test,name="LinearSVC")
-    model_fit(LRmodel,X_train,X_test,y_train, y_test,name="LogisticRegression")
+        XGB_CLASSIFIER = xgb.XGBClassifier()
+    
+
+        model_fit(BNBmodel,X_train,X_test,y_train, y_test,name=f"BernoulliNB-{method_name}")
+        model_fit(SVCmodel,X_train,X_test,y_train, y_test,name=f"LinearSVC-{method_name}")
+        model_fit(LRmodel,X_train,X_test,y_train, y_test,name=f"LogisticRegression-{method_name}") 
+        
+        model_fit(XGB_CLASSIFIER,X_train,X_test,y_train, y_test,name=f"XGB_CLASSIFIER-{method_name}")
+        model_fit(RandomForestClassifiermodel,X_train,X_test,y_train, y_test,name=f"RandomForestClassifier-{method_name}")
+        
+        # model_fit(NUSVCmodel,X_train,X_test,y_train, y_test,name="NonLinearSVC-{method_name}")
+        # model_fit(BiLSTM_SentimentAnalysismodel,X_train,X_test,y_train, y_test,name="BiLSTM_SentimentAnalysismodel-{method_name}")
     
 
 
+
 def model_fit(model,X_train,X_test,y_train, y_test, name="Default"):
+    print("Starting to fit model: "+name)
     model.fit(X_train, y_train)
     model_Evaluate(model,X_train,X_test,y_train, y_test,name=name)
     y_pred1 = model.predict(X_test)
