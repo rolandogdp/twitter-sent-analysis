@@ -1,4 +1,4 @@
-First, copy the full tweets dataset into this folder <\ br>
+First, copy the full tweets dataset into this folder
 Then generate HF dataset by python HF_dataset.py
 To run the program: python HF_transformer.py
 
