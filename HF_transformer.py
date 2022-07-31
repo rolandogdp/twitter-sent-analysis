@@ -47,6 +47,8 @@ val_dataset_global = None
 
 # DATASET CLASSES
 class TrainDataset(Dataset):
+    '''Pytorch Dataset object used to store the data in a format
+    that can be easily sent to the gpu for the models.'''
     def __init__(self, encodings, labels):
         self.encodings = encodings
         self.labels = labels.long()
@@ -60,6 +62,8 @@ class TrainDataset(Dataset):
         return len(self.labels)     # number of items in the Dataset
 
 class TestDataset(Dataset):
+    '''Pytorch Dataset object used to store the data in a format
+    that can be easily sent to the gpu for the models.'''
     def __init__(self, encodings):
         self.encodings = encodings
 
@@ -72,6 +76,10 @@ class TestDataset(Dataset):
 
 # Read a file containing tweets and store them as well as their respective labels
 def read_file(file_name_label_tuple, starting_line=0, end_line=0):
+    '''Helper function to read the default training  files that didn't had the labels in it.
+    Takes a tuple: (filename , label_of_this_file), the starting line and the ending line as parameters.
+    label_of_this_file being and int to set all the tweets loaded from this file.
+    Will return the requested lines in 2 numpy arrays teets, labels.'''
     fname, label = file_name_label_tuple
     tweets, labels = [], []
     with open( fname, 'r', encoding='utf-8') as f:
@@ -82,6 +90,9 @@ def read_file(file_name_label_tuple, starting_line=0, end_line=0):
 
 # Read a file containing tweets and store them as well as their respective labels 
 def read_file_HF(file_name, starting_line=0, end_line=0):
+    '''Helper function to read a file with the HF format ( label \t text).
+    takes the filename, the starting line and the ending line as parameters.
+    Will return the requested lines in 2 numpy arrays teets, labels.'''
     tweets, labels = [], []
     with open( file_name, 'r', encoding='utf-8') as f:
         tweets = [line.split("\t",maxsplit=1) for line in f.readlines()[starting_line:end_line]]
@@ -93,7 +104,9 @@ def read_file_HF(file_name, starting_line=0, end_line=0):
 
 # Store the training data, tweets and labels, in numpy arrays
 def load_train_data(amount_per_batch, iteration):
- 
+    '''Handles reading the data in batches. Uses the helper function read_file_HF to do so.
+    takes as input: the amount of data per subset and the actual iteration number 
+    and returns two arrays: tweets, labels  with length equal or lesser than amount_per_batch.'''
     # if use_full_dataset == True:
     #     X_train_neg_path = project_path + "train_neg_full.txt"
     #     X_train_pos_path = project_path + "train_pos_full.txt"
@@ -132,6 +145,7 @@ def load_train_data(amount_per_batch, iteration):
 
 # Store the testing data (tweets) in a numpy array
 def load_test_data():
+    '''Loads the testing data and returns it in a numpy array.'''
     filename = project_path + "test_data.txt"
     tweets = []
     with open(filename, 'r', encoding='utf-8') as f:
@@ -143,6 +157,12 @@ def load_test_data():
 
 # Vectorize the data 
 def vectorize_data(tweets, train_indices, val_indices):
+    '''Takes as input:
+    tweets: np.array of tweets in text mode.
+    train_indices: np.array of the train indices of the tweets array
+     val_indices: np array of the validation indices of the tweets array.
+     returns X_train,X_val in vectorized form using the CountVectorizer
+    '''
     vectorizer = CountVectorizer(max_features=5000)   # 5000
 
     # Important: we call fit_transform on the training set, and only transform on the validation set
@@ -152,6 +172,14 @@ def vectorize_data(tweets, train_indices, val_indices):
     return X_train, X_val
 
 def get_train_val_data(tweets, labels):
+    ''' Takes as input the tweets and labels as numpy arrays.
+    The tweets being still in text, it will tokenize it using the corresponding tokenizer of the model.
+
+    If it is the first call, it set ups the validation sets, and the training set.
+    On future calls, it reuses the first validation set, and uses the full tweets as training data.
+    it returns train_dataset: TrainDataset,val_dataset_global: TrainDataset 
+    
+    '''
     global val_dataset_global
     if val_dataset_global is None:
         nb_of_samples = len(tweets)
@@ -205,6 +233,13 @@ def get_train_val_data(tweets, labels):
         return train_dataset,val_dataset_global
 
 def get_test_data(tweets):
+    ''' Takes as input the tweets as a numpy array with The tweets still
+     being still in text, it will tokenize it using the corresponding tokenizer of the model.
+     The tokenizer_max_length must be set from the config either passing the corresponding parameter,
+     or the default value. 
+     returns the TestDataset object.
+    
+    '''
     nb_of_samples = len(tweets)
     print(f'{nb_of_samples} tweets loaded for testing.\n')
     tweets = tokenizer(tweets, max_length=config.tokenizer_max_length, padding="max_length", truncation=True)
@@ -213,6 +248,8 @@ def get_test_data(tweets):
     return tweets
 
 def compute_metrics(eval_pred): 
+    '''Required function to evaluate the predictions of the model on the evaluation dataset.
+     '''
     logits, labels = eval_pred      # here, we have to get rid of the second element (neutral class) of the logits before taking the softmax IF we want to only predict neg/pos
     predictions = np.argmax(logits, axis=-1)
 
@@ -220,6 +257,15 @@ def compute_metrics(eval_pred):
 
 
 def train(model, train_dataset, val_dataset, iteration):
+    '''Helper function to start the training of a model.
+    takes as input:
+    - model: a huggingface model
+    - train_dataset: a TrainDataset object used for the training.
+    - val_dataset: a TrainDataset object used for the validation
+    - iteration : is used when running with subsets, to save the different models of different versions. 
+    
+    Creates a Trainer using the training arguments defaults, and the ones passed by commandline.
+    Doesn't return anything per se, but the model taken as parameter will be trained after the training.'''
 
     training_args = TrainingArguments(output_dir=checkpoints_path, 
                                     overwrite_output_dir=True,
@@ -265,6 +311,9 @@ def train(model, train_dataset, val_dataset, iteration):
 
 
 def load_model_from_checkpoint(path_to_checkpoint):
+    ''' Helper function, to load the model from a checkpoint.
+    takes as input a path to the checkpoint (from the "experiment-[...]" )
+     '''
     full_path_to_model_checkpoint = experiment_path + path_to_checkpoint
     model = AutoModelForSequenceClassification.from_pretrained(full_path_to_model_checkpoint, num_labels=config.num_labels, local_files_only=False, ignore_mismatched_sizes=True)
     print(f"Loaded model from: {full_path_to_model_checkpoint}")
@@ -273,6 +322,7 @@ def load_model_from_checkpoint(path_to_checkpoint):
 
 
 def numpy_2d_softmax(model_preds):
+    '''Converts the raw predictions from a HuggingFace model into clean logits.'''
     max = np.max(model_preds, axis=1, keepdims=True)
     e_x = np.exp(model_preds-max)
     sum = np.sum(e_x, axis=1, keepdims=True)
@@ -280,6 +330,10 @@ def numpy_2d_softmax(model_preds):
     return out
 
 def test(model):
+    ''' Takes the trained model as input, and will get the testing data and produce the predictions.
+    Also produces the logits.txt file that is used for ensembling the models.
+    returns a numpy array with the predictions of the model.
+     '''
 
     test_trainer = Trainer(model)
     tweets = get_test_data(load_test_data())
@@ -287,7 +341,6 @@ def test(model):
     Y_test_pred = np.argmax(raw_preds, axis=1)
 
     # store the logits in a file
-    # print(raw_preds)
     logits = numpy_2d_softmax(raw_preds)    # beer owning line
     print(len(logits))
     print(logits)
@@ -305,6 +358,8 @@ def test(model):
     return Y_test_pred
 
 def generate_submission(Y_preds):
+    '''Takes as input a numpy array containing the model predictions, and generates 
+    a correctly formatted output csv file for the kaggle competition.'''
     nb_of_samples=len(Y_preds)
     results = np.zeros((nb_of_samples, 2))
 
@@ -317,12 +372,24 @@ def generate_submission(Y_preds):
     return final_filename
 
 def load_and_train(model, amount_per_batch, iteration):
+    '''Helper function for training the model using the batches strategie to allow the model the run on systems with low amount of memory.
+    takes as input: 
+    -model: the model to train (HF model)
+    -amount_per_batch: The amount of data to be loaded and used on each iteration.
+    -iteration: At which iteration the training is.
+
+    In case the use HF_dataset format has been used, you should not run this function multiple times, only once as 
+    all the data will be loaded using HuggingFace's api. There is also no way to select the amount of data to work 
+    on when using this parameter.
+
+    
+    returns the trained model.'''
     
     if model is None:
         model = AutoModelForSequenceClassification.from_pretrained(config.model_name, num_labels=config.num_labels, local_files_only=False, ignore_mismatched_sizes=True)
 
 
-    if config.use_HF_dataset_format:
+    if config.use_HF_dataset_format: # Using HuggingFace api to load all the data.
         train_dataset = load_dataset("./HF_dataset.py", split="train")
         val_dataset = load_dataset("./HF_dataset.py", split="validation")
 
@@ -353,6 +420,7 @@ def load_and_train(model, amount_per_batch, iteration):
 
 # DISCORD 
 def send_discord_notif(title, content, color, error=None):
+    '''Simple function to allow callbacks to the discord channel to get updates when running for a long time.'''
     if not discord_enabled:
         return
     if error is None:
@@ -381,6 +449,8 @@ def send_discord_notif(title, content, color, error=None):
 
 # KAGGLE API
 def submit_preds_on_Kaggle(submit_filename, msg):
+    '''Simple helper function to submit the predictions csv file on the test data to the kaggle competition
+    takes as input the file path to the csv, and the message to put on the leaderboard.'''
     import kaggle
     api = kaggle.api
     api.get_config_value("username")
@@ -391,6 +461,14 @@ def submit_preds_on_Kaggle(submit_filename, msg):
 
 # TRAINING
 def run_training(model):
+    ''' Function to call from the main to start the training, takes as input the model to train.
+    It will handle all the requirements for the training.
+    It will load all the data required for training, if using subsets it will handle all the iterations over the data.
+    If enabled it will send discord notification on training start, and at each subset ending.
+    It will also handle the wandb initialisation of a project with name being: cil-{model_name} 
+    It will also catch errors that happened during training and send them to the discord hook and proceed to exit. 
+    
+    returns a trained model. '''
     print(f"Going to iterate over {number_of_iterations} subsets of {amount_per_it} samples/tweets (separated for training/validation) to see {total_amount_of_tweets} in total.")
     send_discord_notif("Starting Training", f"Going to iterate over {number_of_iterations} subsets of {amount_per_it} samples/tweets (separated for training/validation) to see {total_amount_of_tweets} in total.", orange, None)
     wandb_project_name = f"cil-{model_name}".replace("/","-").replace("\\","").replace("?","").replace("%","").replace(":","")
@@ -420,6 +498,8 @@ def run_training(model):
 
 # TESTING
 def run_testing(model):
+    '''Function to call from main to start the testing of a trained model.
+    Takes as input the trained model and returns the output filename.csv'''
     try:
         Y_test_pred = test(model)
         submit_filename = generate_submission(Y_test_pred)
