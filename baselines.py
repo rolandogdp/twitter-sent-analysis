@@ -251,6 +251,8 @@ def preprocess_data(labels,tweets,token_tool=0):
     return X_train,X_test,y_train, y_test
 
 def plot_roc_auc(y_test,y_pred,name="Default"):
+    '''Code taken online to produce simple plots, to help quickly compare the models/tokenizers.
+    takes the true y and the predicted y, and a name for the model'''
     
     fpr, tpr, thresholds = roc_curve(y_test, y_pred)
     roc_auc = auc(fpr, tpr)
