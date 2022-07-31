@@ -1,32 +1,33 @@
 # Twitter Sentiment Analysis
 Team name: AntipathyGlance
+
 Team members: Rolando, Klim, Mengtao, Fabian
 
 ## How to use
 
 1) Clone this repo
 2) Download the twitter Datasets and extract everything in this folder.
-3) Install the python dependances ,You can install them with 
+3) Install the python dependencies, You can install them with 
     > pip install -r pip-freeze.txt
 >
 4) Run the HF_dataset.py
 5) Now you can run HF_transformer.py for the best models.
 6) You can also run the file baselines.py for the baselines. (you will need to create an empty 'images' folder)
 
-(Quick Note: When running locally or on the cluster the environemment and the paths are usually different. For this reason there exists an --on_cluster parameter that allows to switch between envirements. You will need to setup some envirement variables on the cluster:
+(Quick Note: When running locally or on the cluster the environment and the paths are usually different. For this reason there exists an --on_cluster parameter that allows to switch between environments. You will need to set up some environment variables on the cluster:
 > CIL_PROJECT_PATH
 
-> CIL_EXPERIMENTS_PATH  -> it is recommended to put this one on the scratch partition.
+> CIL_EXPERIMENTS_PATH → it is recommended to put this one on the scratch partition.
 
 )
 ### Branches
 There are 3 main branches for the final project:
-- master: This is where most of the code is, in it's final state. It can run all of the HuggingFace models using the HF_dataset.py file. The required parameters must be provided for it to run.
+- master: This is where most of the code is, in its final state. It can run all the HuggingFace models using the HF_dataset.py file. The required parameters must be provided for it to run.
 
 - CA-KL: You will need to switch to this branch, check that you still have the correct HF_data.txt file. Then you will be able to run this model with
 > python SCAL_transformer.py --cfg configs/default_gpu.yaml 
 
-- bertTweetCustom: You will need to switch to this branch, check that you still have the correct HF_data.txt file.The you will be able to run this model in the same way as master. For example:
+- bertTweetCustom: You will need to switch to this branch, check that you still have the correct HF_data.txt file. You will be able to run this model in the same way as master. For example:
 >  python HF_transformer.py --tag "Test Transformer" --on_cluster --train --test --amount_per_it 50000 --amount_of_data 2000000 --full_data --bs_train 32 --bs_eval 16 --n_epochs 3
 
 ### HF_transformer.py Usage
@@ -76,7 +77,7 @@ There are 3 main branches for the final project:
 >
 
 
-### Twitter  Datasets
+### Twitter Datasets
 
 Download the tweet datasets from here:
 http://www.da.inf.ethz.ch/teaching/2018/CIL/material/exercise/twitter-datasets.zip
@@ -84,7 +85,7 @@ http://www.da.inf.ethz.ch/teaching/2018/CIL/material/exercise/twitter-datasets.z
 
 The dataset should have the following files:
 - sample_submission.csv
-- train_neg.txt :  a subset of negative training samples
+- train_neg.txt : a subset of negative training samples
 - train_pos.txt: a subset of positive training samples
 - test_data.txt:
 - train_neg_full.txt: the full negative training samples
