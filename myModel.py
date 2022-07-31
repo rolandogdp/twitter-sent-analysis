@@ -10,7 +10,7 @@ from transformers import DebertaV2Config
 from transformers import PreTrainedModel
 from transformers.modeling_outputs import SequenceClassifierOutput
 
-
+#bidirectional KL Divergence
 def compute_kl_loss(p, q, pad_mask=None):
     
 		p_loss = F.kl_div(F.log_softmax(p, dim=-1), F.softmax(q, dim=-1), reduction='none')
@@ -34,7 +34,7 @@ def weights_init(m):
         torch.nn.init.zeros_(m.bias)
 
 class MyModel(PreTrainedModel):
-	def __init__(self, model_name = "vinai/bertweet-base" , config = None):
+	def __init__(self, model_name = "vinai/bertweet-base" , config = None): #use bertweer-base as backbone
 		model = AutoModel.from_pretrained(model_name, num_labels = 2)
 		#self.config.layer_norm_eps = 1e-6
 		if config is None:
@@ -45,8 +45,8 @@ class MyModel(PreTrainedModel):
 		self.config = model.config
 		self.model = model;
 		self.features_dim = self.config.hidden_size
-		self.dropoutProb = 0.3;
-		self.classifier = nn.Sequential(
+		self.dropoutProb = 0.3; #set dropout probability for simolified r-drop
+		self.classifier = nn.Sequential( #MLP as classifier head
 			nn.Linear(self.features_dim, 1024),
 			nn.Dropout(self.dropoutProb),
 			nn.Linear(1024, 1024),
@@ -72,9 +72,8 @@ class MyModel(PreTrainedModel):
 		if attention_mask is None:
 			attention_mask = torch.ones_like(input_ids)
 		
-		token_type_ids = torch.zeros_like(input_ids)
+		token_type_ids = torch.zeros_like(input_ids) #set to zero for roberta style finetuning
 		
-		#with torch.enable_grad():
 		outputs = self.model(
             input_ids,
             attention_mask=attention_mask,
@@ -86,25 +85,24 @@ class MyModel(PreTrainedModel):
             output_hidden_states=output_hidden_states,
             return_dict=True,
 		)
-		#print(self.model.modules)
-		#print(outputs)
+
 		sequence_output = outputs[0]
-		#print(sequence_output.shape)
+		#
 		if(len(sequence_output.shape) == 3):
-			logits1 = self.classifier(sequence_output[:,0])
+			logits1 = self.classifier(sequence_output[:,0]) #two forward pass on classifier head for simplified r-drop
 			logits2 = self.classifier(sequence_output[:,0])
 		else:
 			logits1 = self.classifier(sequence_output)
 			logits2 = self.classifier(sequence_output)
 	
-
+		#ensemble the results
 		logits = 0.5*(logits1+logits2)
 		loss = torch.tensor(0.0)
 		if labels is not None:
 			loss_fce = nn.CrossEntropyLoss()
 			kl_loss = compute_kl_loss(logits1, logits2)
 			ce_loss = loss_fce(logits.view(-1,2), labels.view(-1))
-			loss = ce_loss+kl_loss
+			loss = ce_loss+kl_loss #kl divergence for regularization
 		
 
 		if not return_dict:
